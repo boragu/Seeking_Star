@@ -1,0 +1,20 @@
+{
+  "name": "별보러간다",
+  "short_name": "별보러간다",
+  "description": "혼잡을 피해 더 안전하고 고요한 밤하늘로 안내하는 강원 관광 웹앱",
+  "lang": "ko-KR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07131f",
+  "theme_color": "#07131f",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/assets/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

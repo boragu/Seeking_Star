@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>별보러간다 API 문서</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+    <style>
+      html { box-sizing: border-box; overflow-y: scroll; }
+      *, *::before, *::after { box-sizing: inherit; }
+      body { margin: 0; background: #f4efe4; }
+      .topbar { display: none; }
+      .swagger-ui .info .title, .swagger-ui .opblock-tag { font-family: Georgia, "Noto Serif KR", serif; }
+      .swagger-ui .scheme-container { background: #f4efe4; box-shadow: none; border-block: 1px solid #cfc5b6; }
+    </style>
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
+    <script>
+      window.addEventListener("load", function () {
+        SwaggerUIBundle({ url: "/api/openapi.json", dom_id: "#swagger-ui", deepLinking: true, tryItOutEnabled: true });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,71 @@
+import type { Destination, PlannerState } from "../domain/types";
+
+export const scoringWeights = Object.freeze({
+  crowd: 0.38,
+  sky: 0.28,
+  parking: 0.12,
+  travel: 0.12,
+  accessibility: 0.1,
+});
+
+export type ScoreKey = keyof typeof scoringWeights;
+export type ScoreBreakdown = Partial<Record<ScoreKey, number>>;
+
+export interface DestinationAnalysis {
+  total: number | null;
+  breakdown: ScoreBreakdown;
+  strongest: ScoreKey[];
+  dataCompleteness: number;
+}
+
+export type RankedDestination = Destination & { analysis: DestinationAnalysis };
+
+const clamp = (value: number, min = 0, max = 100): number => Math.min(max, Math.max(min, value));
+
+export function parseMinutes(value: string | number | null | undefined): number {
+  if (typeof value === "number") return value;
+  const text = String(value ?? "");
+  const hours = Number(text.match(/(\d+)시간/)?.[1] ?? 0);
+  const minutes = Number(text.match(/(\d+)분/)?.[1] ?? 0);
+  return hours * 60 + minutes;
+}
+
+export function scoreDestination(
+  destination: Destination,
+  preferences: Pick<PlannerState, "accessibility"> | { accessibility?: boolean } = {},
+): DestinationAnalysis {
+  const breakdown: ScoreBreakdown = {};
+  if (destination.calm !== null) breakdown.crowd = Math.round(clamp(destination.calm));
+  if (destination.cloud !== null) breakdown.sky = Math.round(clamp(100 - destination.cloud));
+  if (destination.parkingMinutes !== null) breakdown.parking = Math.round(clamp(100 - destination.parkingMinutes * 1.65));
+  if (destination.travelMinutesEstimate !== null) {
+    breakdown.travel = Math.round(clamp(100 - Math.max(0, destination.travelMinutesEstimate - 120) * 0.42));
+  }
+  if (preferences.accessibility && destination.accessible !== null) {
+    breakdown.accessibility = destination.accessible ? 100 : 20;
+  }
+
+  const available = (Object.entries(breakdown) as [ScoreKey, number][]);
+  const availableWeight = available.reduce((sum, [key]) => sum + scoringWeights[key], 0);
+  const total = availableWeight === 0
+    ? null
+    : Math.round(available.reduce((sum, [key, value]) => sum + value * scoringWeights[key], 0) / availableWeight);
+  const strongest = [...available].sort((a, b) => b[1] - a[1]).slice(0, 2).map(([key]) => key);
+  const dataCompleteness = Math.round((available.length / Object.keys(scoringWeights).length) * 100);
+
+  return { total, breakdown, strongest, dataCompleteness };
+}
+
+export function rankDestinations(
+  items: Destination[],
+  preferences: Pick<PlannerState, "accessibility"> | { accessibility?: boolean } = {},
+): RankedDestination[] {
+  return items
+    .map((destination) => ({ ...destination, analysis: scoreDestination(destination, preferences) }))
+    .sort((a, b) => {
+      if (a.analysis.total === null && b.analysis.total === null) return a.name.localeCompare(b.name, "ko");
+      if (a.analysis.total === null) return 1;
+      if (b.analysis.total === null) return -1;
+      return b.analysis.total - a.analysis.total;
+    });
+}
