@@ -99,6 +99,8 @@ export function normalizeCampingItem(item) {
   return {
     id: String(id),
     name: String(name).trim(),
+    category: firstValue(item, ["induty", "lctCl"]) ?? "야영장",
+    facilities: firstValue(item, ["sbrsCl", "facilities"]),
     address: compactAddress(firstValue(item, ["addr1"]), firstValue(item, ["addr2"])),
     region: compactAddress(firstValue(item, ["doNm"]), firstValue(item, ["sigunguNm"])),
     latitude: point.latitude,

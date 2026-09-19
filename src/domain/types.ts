@@ -4,6 +4,7 @@ export interface NearbyPlace {
   id: string;
   name: string;
   category?: string | null;
+  facilities?: string | null;
   address?: string;
   region?: string;
   latitude: number | null;
