@@ -44,6 +44,17 @@ export function PlannerForm({
       <div className="space-y-4">
         <Field
           label="출발지"
+          action={
+            <button
+              className="flex items-center gap-1 text-[11px] font-medium text-teal underline underline-offset-2 hover:opacity-80 transition disabled:opacity-40"
+              onClick={requestCurrentLocation}
+              disabled={locationFeedback.status === "loading"}
+              type="button"
+            >
+              <Crosshair size={13} className={locationFeedback.status === "loading" ? "animate-spin text-teal" : ""} />
+              <span>내 현재 위치로 설정</span>
+            </button>
+          }
           hint={
             <span className={cn("flex items-center gap-1.5", locationProblem ? "text-rust" : "text-teal")}>
               {locationFeedback.status === "success" ? <SealCheck weight="fill" /> : <Info />} {locationFeedback.message}
@@ -56,13 +67,15 @@ export function PlannerForm({
               value={planner.departure}
               onChange={(event) => updateDeparture(event.target.value)}
               aria-label="출발지"
+              placeholder="예: 서울역, 춘천, 원주, 강남"
             />
             <button
-              className="grid size-8 shrink-0 place-items-center text-teal disabled:opacity-45"
+              className="grid size-8 shrink-0 place-items-center text-teal disabled:opacity-45 hover:bg-teal/10 rounded transition"
               aria-label="현재 위치 사용"
               onClick={requestCurrentLocation}
               disabled={locationFeedback.status === "loading"}
               type="button"
+              title="내 현재 GPS 위치로 설정"
             >
               <Crosshair className={locationFeedback.status === "loading" ? "animate-spin" : undefined} />
             </button>

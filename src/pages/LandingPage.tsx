@@ -8,7 +8,7 @@ import { HeroGuide } from "../features/landing/HeroGuide";
 import { formatShortKoreanDate } from "../lib/currentContext";
 
 export function LandingPage({ navigate }: { navigate: Navigate }) {
-  const { planner } = useApp();
+  const { planner, location } = useApp();
   return (
     <div className="min-h-screen bg-ink text-cream">
       <AppHeader path="/" navigate={navigate} />
@@ -18,7 +18,20 @@ export function LandingPage({ navigate }: { navigate: Navigate }) {
           <div className="mb-10 flex items-center gap-5 text-[12px] text-cream/65 max-md:flex-wrap max-md:gap-3 max-md:text-[11px]">
             <span className="flex items-center gap-2"><CalendarBlank /> {formatShortKoreanDate(new Date())}</span>
             <i className="h-3 w-px bg-cream/20" />
-            <span className="flex items-center gap-2">{planner.locationSource === "device" ? <Crosshair /> : <MapPin />} {planner.departure}</span>
+            <button
+              type="button"
+              onClick={location.request}
+              className="flex items-center gap-2 hover:text-gold-light transition cursor-pointer"
+              title="내 현재 GPS 위치로 설정"
+            >
+              {planner.locationSource === "device" ? <Crosshair className="text-teal-300" /> : <MapPin />}
+              <span>{planner.departure}</span>
+              {planner.locationSource !== "device" && (
+                <span className="rounded bg-cream/10 px-1.5 py-0.5 text-[10px] font-medium text-gold-light hover:bg-cream/20">
+                  내 위치 불러오기
+                </span>
+              )}
+            </button>
           </div>
           <h1 className="my-5 max-w-[820px] font-display text-[clamp(44px,5.2vw,74px)] font-bold leading-[1.14] tracking-[-0.05em] max-md:text-[clamp(36px,10vw,48px)]">
             혼잡한 명소 대신,<br />
