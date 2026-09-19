@@ -75,7 +75,7 @@ export function CongestionForecast({
                   {item.level}
                 </span>
               </div>
-              <span className="mt-0.5 text-[9px] text-stone-500">{item.congestionScore}점</span>
+              <span className="mt-0.5 text-[9px] text-stone-500">{item.congestionScore}%</span>
             </div>
           );
         })}

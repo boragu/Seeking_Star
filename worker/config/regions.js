@@ -1,22 +1,22 @@
 export const gangwonSigunguCodes = [
-  "110", // 춘천시
-  "130", // 원주시
-  "150", // 강릉시
-  "170", // 동해시
-  "190", // 태백시
-  "210", // 속초시
-  "230", // 삼척시
-  "720", // 홍천군
-  "730", // 횡성군
-  "750", // 영월군
-  "760", // 평창군
-  "770", // 정선군
-  "780", // 철원군
-  "790", // 화천군
-  "800", // 양구군
-  "810", // 인제군
-  "820", // 고성군
-  "830", // 양양군
+  "51110", // 춘천시
+  "51130", // 원주시
+  "51150", // 강릉시
+  "51170", // 동해시
+  "51190", // 태백시
+  "51210", // 속초시
+  "51230", // 삼척시
+  "51720", // 홍천군
+  "51730", // 횡성군
+  "51750", // 영월군
+  "51760", // 평창군
+  "51770", // 정선군
+  "51780", // 철원군
+  "51790", // 화천군
+  "51800", // 양구군
+  "51810", // 인제군
+  "51820", // 고성군
+  "51830", // 양양군
 ];
 
 export const supportedRegions = Object.freeze({
@@ -25,10 +25,9 @@ export const supportedRegions = Object.freeze({
     label: "강원특별자치도",
     tourAreaCode: "32",
     concentrationAreaCode: "51",
-    concentrationSignguCode: "750",
+    concentrationSignguCode: "51750",
     sigunguCodes: gangwonSigunguCodes,
   },
 });
 
 export const defaultRegion = supportedRegions.gangwon;
-

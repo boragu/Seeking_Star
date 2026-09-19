@@ -50,7 +50,7 @@ export function AlertPreview({
         </strong>
         <p className="mt-2 text-[11px] leading-5 text-cream/70">
           {destination?.concentrationRate !== null && destination?.concentrationRate !== undefined
-            ? `현재 기준 예상 혼잡도는 ${destination.concentrationRate}입니다. 출발 전 변동 발생 시 알림이 전송됩니다.`
+            ? `현재 기준 예상 혼잡도는 ${destination.concentrationRate}%입니다. 출발 전 변동 발생 시 알림이 전송됩니다.`
             : "출발 전 혼잡도 변동 시 알림이 전송됩니다."}
         </p>
       </div>
