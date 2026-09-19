@@ -233,56 +233,56 @@ export function generateAiJourneyBriefing(
   const transport = planner.transport || "car";
   const moon = calculateMoonPhase(planner.date);
 
-  // 1. 개인화 여행 페르소나 브리핑 요약
-  let personaSummary = `${planner.departure}에서 ${transport === "rental" ? "렌터카로" : "자가용으로"} ${people === "1" ? "혼자" : `${people}인이`} 출발하여 ${destination.name}으로 향하는 밤하늘 여정입니다. `;
+  // 1. 여행 일정 요약
+  let personaSummary = `${planner.departure}에서 ${transport === "rental" ? "렌터카로" : "자가용으로"} 이동하는 일정입니다. `;
   if (calmScore >= 75) {
-    personaSummary += `대도시 근교의 인파 과밀을 피해 고요하고 깨끗한 밤하늘을 만끽할 수 있는 안심 관측 코스입니다. (${moon.phaseIcon} ${moon.phaseName})`;
+    personaSummary += `${destination.name}은 주변 빛공해가 적고 방문객이 붐비지 않아 여유롭게 밤하늘을 관측하기 좋습니다. (${moon.phaseIcon} ${moon.phaseName})`;
   } else {
-    personaSummary += `전국적인 인기로 야간 방문객이 많으므로 진입로 병목과 주차 여건을 고려한 스마트 분산 이동이 필요합니다.`;
+    personaSummary += `${destination.name}은 야간 방문객이 집중되는 명소이므로, 진입로 정체와 주차 대기를 피해 심야 시간대 분산 방문을 권장합니다.`;
   }
 
   // 2. 핵심 안심 관측 포인트 (3개)
   const goldenKeyPoints: string[] = [];
 
   if (travelMins <= 90) {
-    goldenKeyPoints.push(`편도 약 ${travelMins}분대의 가벼운 주행으로 심야 귀가 운전 피로를 최소화할 수 있습니다.`);
+    goldenKeyPoints.push(`편도 약 ${travelMins}분 소요로 심야 귀가 운전 부담이 적습니다.`);
   } else {
-    goldenKeyPoints.push(`편도 약 ${travelMins}분의 중장거리 코스로, 중간 휴게소 경유와 졸음운전 방지 휴식이 권장됩니다.`);
+    goldenKeyPoints.push(`편도 약 ${travelMins}분 거리로, 야간 운전 피로를 줄이기 위한 중간 휴식을 권장합니다.`);
   }
 
   if (campgroundsCount > 0) {
-    goldenKeyPoints.push(`인근 20km 내 등록 야영장(${campgroundsCount}곳)이 있어 무단 차박 없이 합법적 체류가 가능합니다.`);
+    goldenKeyPoints.push(`반경 20km 내 등록 야영장(${campgroundsCount}곳)이 있어 무단 차박 없이 안전하게 체류할 수 있습니다.`);
   } else {
-    goldenKeyPoints.push(`주변 지정 야영 인프라가 제한적이므로 당일 야간 관측 후 안전 복귀 일정을 권장합니다.`);
+    goldenKeyPoints.push(`주변 지정 야영 시설이 부족하므로 관측 후 당일 복귀 일정을 권장합니다.`);
   }
 
   if (isAccessible) {
     goldenKeyPoints.push(
       destination.accessible
-        ? "휠체어·유아차 진입로와 평지 주차 공간이 확보된 무장애(Barrier-Free) 안심 관측지입니다."
-        : "비포장 산간 진입로나 계단이 있을 수 있으니 사전 이동 동선 확인을 권장합니다."
+        ? "휠체어 및 유아차 진입로와 평지 주차 공간이 확보되어 있습니다."
+        : "비포장 산간 진입로나 계단이 있을 수 있으니 이동 동선 확인이 필요합니다."
     );
   } else {
     goldenKeyPoints.push(
       calmScore >= 75
-        ? `주변 광공해가 차단된 고지대로 ${moon.interferenceLabel} 여건에서 밤하늘 관측 선명도가 높습니다.`
-        : "차량 헤드라이트 간섭을 피해 주차장 안쪽 관측 포인트 선점을 추천합니다."
+        ? `고지대 특성상 탁 트인 시야를 제공하며 ${moon.interferenceLabel} 여건입니다.`
+        : "차량 조명 간섭을 피하기 위해 주차장 안쪽 관측 지점을 이용하세요."
     );
   }
 
   // 3. 출발 및 이동 타이밍 조언
   let departureTimingAdvice = "";
   if (isWeekend) {
-    departureTimingAdvice = `주말 야간 정체를 피해 ${destination.name} 도착 기준 22:30 이후 또는 일몰 직후(19:30 전후) 빠른 도착을 추천합니다.`;
+    departureTimingAdvice = `주말 정체를 피해 ${destination.name}에 22:30 이후 또는 일몰 직후 도착하는 것이 원활합니다.`;
   } else {
-    departureTimingAdvice = `평일 야간은 진입로가 비교적 한적하므로 21:00~23:00 사이 여유로운 출발이 최적입니다.`;
+    departureTimingAdvice = `평일 야간은 도로가 한적하므로 21:00~23:00 사이 여유롭게 이동하기 좋습니다.`;
   }
 
   // 4. 안전 및 체류 팁
   const safetyAndComfortTips = [
-    "산간 고지대는 평지 대비 기온이 5~8℃ 낮으므로 계절 무관 방한 외투 필수",
-    "야간 관측 시 타인 시야 방해 방지를 위해 적색 라이트 또는 스마트폰 밝기 최소화",
-    "국립공원 및 지자체 조례에 따라 지정 구역 외 취사/야영/불멍 엄격 금지",
+    "산간 고지대는 평지보다 기온이 5~8℃ 낮으므로 방한 외투 필수 지참",
+    "야간 관측 시 타인 시야 방해를 줄이기 위해 붉은색 조명 사용 권장",
+    "국립공원 및 지자체 조례에 따라 지정 구역 외 취사/야영 금지",
   ];
 
   return {
@@ -311,15 +311,15 @@ export async function requestAiEnhancedGuide(
 - 목적지: ${destination.name} (${destination.address || destination.region || "위치 정보"})
 - 여행 일자 및 시간: ${planner.date} ${planner.time}
 - 동행 인원: ${planner.people || 2}명, 이동 수단: ${planner.transport === "rental" ? "렌터카" : "자가용"}
-- 무장애/배려 여행 필요: ${planner.accessibility ? "예 (휠체어/유아차/완만 동선 필요)" : "아니오"}
+- 무장애/배려 여행 필요: ${planner.accessibility ? "예 (완만 동선 및 편의시설 필요)" : "아니오"}
 - 공공데이터 한적도: ${calmScore}점 (100점 만점, 높을수록 한적함)
 - 예상 편도 소요시간: 약 ${travelMins}분
 - 인근 20km 내 등록 야영장: ${campgroundsCount}곳
 
-[지시 사항]
-당신은 한국관광공사 관광빅데이터 및 밤하늘 관측 전문 AI 컨설턴트입니다.
-위 데이터를 바탕으로 여행자에게 실질적인 도움이 되는 친절하고 정갈한 맞춤형 밤하늘 여정 브리핑을 2~3문장으로 작성해 주세요.
-(과밀 분산 시간대, 심야 운전 안전, 관측지 체류 팁을 자연스럽게 포함해 주세요. 마크다운 기호 없이 자연스러운 한국어 문장으로 작성하세요.)`;
+[작성 규칙]
+1. 인위적인 AI 말투('초개인화', 'AI로서', '환상적인 밤하늘을 선물합니다' 등 과장된 홍보성 문구)는 완전히 배제하세요.
+2. 현지 도로/혼잡 상황, 출발 타이밍, 고지대 안전 수칙을 실질적이고 담백하게 2~3문장으로 조언하세요.
+3. 마크다운 기호 없이 깔끔하고 자연스러운 한국어 문장으로 작성하세요.`;
 
     const res = await fetch("/api/ai/guide", {
       method: "POST",
@@ -329,7 +329,7 @@ export async function requestAiEnhancedGuide(
         messages: [
           {
             role: "system",
-            content: "당신은 한국관광공사 관광 빅데이터 기반의 안심 밤하늘 여행 및 오버투어리즘 분산 전문 AI 가이드입니다.",
+            content: "당신은 한국관광공사 관광 빅데이터 기반의 밤하늘 관측 및 과밀 분산 여행 가이드입니다. 담백하고 정확한 조언을 제공합니다.",
           },
           { role: "user", content: prompt },
         ],

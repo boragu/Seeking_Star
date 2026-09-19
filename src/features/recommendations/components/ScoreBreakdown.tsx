@@ -47,11 +47,11 @@ export function ScoreBreakdown({ destination }: { destination: RankedDestination
           return (
             <div key={key}>
               <div className="mb-1.5 flex justify-between gap-2 text-[11px]">
-                <span className={hasValue ? "text-stone-600 dark:text-stone-300" : "text-stone-400 dark:text-stone-600"}>
+                <span className={hasValue ? "font-bold text-stone-900 dark:text-stone-100" : "text-stone-400 dark:text-stone-600"}>
                   {label}
                 </span>
                 {hasValue ? (
-                  <strong>{value}</strong>
+                  <strong className="font-extrabold text-teal dark:text-teal-300">{value}</strong>
                 ) : (
                   <span className="text-stone-400 dark:text-stone-600 font-medium" title="공공데이터 미제공 또는 결측">-</span>
                 )}
