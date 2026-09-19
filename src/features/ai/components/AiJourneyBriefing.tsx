@@ -16,14 +16,13 @@ export function AiJourneyBriefing({
   const [hasError, setHasError] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState<number>(0);
 
-  // 로컬 보조 가이드 (타이밍 및 핵심 포인트)
+  // 로컬 보조 가이드 (출발 타이밍 및 팩트 포인트)
   const localBriefing = generateAiJourneyBriefing(destination, planner);
 
   useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
 
-    // 새 요청 시 이전 텍스트를 비우고 로딩 상태를 명확히 표시
     setIsLoading(true);
     setHasError(false);
     setLlmText(null);
@@ -67,13 +66,7 @@ export function AiJourneyBriefing({
               맞춤 여정 브리핑
             </h3>
           </div>
-          {isLoading ? (
-            <AiBadge label="vLLM AI 실시간 생성 중..." variant="teal" />
-          ) : llmText ? (
-            <AiBadge label="vLLM AI 생성 완료" variant="gold" />
-          ) : (
-            <AiBadge label="AI 통신 확인" variant="subtle" />
-          )}
+          <AiBadge label="AI 브리핑" variant="teal" />
         </div>
 
         <div className="flex items-center gap-2">
@@ -82,10 +75,10 @@ export function AiJourneyBriefing({
             onClick={handleRefresh}
             disabled={isLoading}
             className="inline-flex items-center gap-1 text-[11px] font-medium text-stone-600 hover:text-teal disabled:opacity-50 transition cursor-pointer"
-            title="vLLM AI 브리핑 다시 생성"
+            title="AI 브리핑 다시 생성"
           >
             <ArrowClockwise size={13} className={isLoading ? "animate-spin text-teal" : ""} />
-            <span>{isLoading ? "AI 생성 중..." : "AI 다시 생성"}</span>
+            <span>{isLoading ? "작성 중..." : "다시 생성"}</span>
           </button>
           <span className="shrink-0 text-[11px] text-stone-500">
             {planner.departure} 출발 · {planner.date || "선택일자"}
@@ -93,13 +86,13 @@ export function AiJourneyBriefing({
         </div>
       </div>
 
-      {/* 브리핑 본문: vLLM AI 실시간 생성 내용 */}
-      <div className="mt-3 min-h-[50px]">
+      {/* 브리핑 본문: vLLM AI 실시간 생성 내용 (먹색 텍스트 & 편안한 행간) */}
+      <div className="mt-3 min-h-[44px]">
         {isLoading ? (
           <div className="space-y-2 py-1">
-            <div className="flex items-center gap-2 text-[11px] font-medium text-teal animate-pulse">
-              <Sparkle size={14} className="animate-spin" />
-              <span>vLLM AI 모델이 여행 조건과 천문 빅데이터를 분석하여 브리핑을 작성하고 있습니다...</span>
+            <div className="flex items-center gap-2 text-[11px] text-stone-600 animate-pulse">
+              <Sparkle size={14} className="text-teal animate-spin" />
+              <span>AI 모델이 맞춤 브리핑을 작성하고 있습니다...</span>
             </div>
             <div className="space-y-1.5 animate-pulse">
               <div className="h-3 w-4/5 rounded bg-line/60" />
@@ -122,7 +115,7 @@ export function AiJourneyBriefing({
             </button>
           </div>
         ) : (
-          <p className="text-[12px] leading-relaxed font-medium text-stone-800 dark:text-stone-200">
+          <p className="text-[12px] leading-relaxed font-normal text-ink whitespace-pre-line">
             {llmText}
           </p>
         )}
