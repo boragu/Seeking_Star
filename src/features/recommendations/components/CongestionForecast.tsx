@@ -12,24 +12,24 @@ export function CongestionForecast({
   const forecast = calculateCongestionForecast(destination, dateString);
 
   return (
-    <div className="mt-4 border border-line bg-paper/50 p-4">
+    <div className="mt-4 border border-line bg-paper/60 p-4">
       <div className="flex items-center justify-between border-b border-line/60 pb-2.5 max-sm:flex-wrap max-sm:gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <Clock size={18} className="text-teal" />
           <h3 className="font-display text-[14px] font-bold text-ink">
             시간대별 혼잡도 & 진입로 병목 예측
           </h3>
         </div>
-        <span className="shrink-0 text-[10px] text-stone-500">
+        <span className="shrink-0 text-[11px] text-stone-500">
           요일·시간대별 가중치 예측 모델
         </span>
       </div>
 
       {/* 골든 타임 안내 */}
-      <div className="mt-3 flex items-start gap-2.5 rounded border border-teal/30 bg-teal/5 p-2.5 text-[11px] text-stone-700">
-        <ShieldCheck size={18} weight="fill" className="mt-0.5 shrink-0 text-teal" />
+      <div className="mt-3 flex items-start gap-2.5 rounded border border-line/60 bg-white/60 p-2.5 text-[11px] leading-relaxed text-stone-700">
+        <ShieldCheck size={16} weight="fill" className="mt-0.5 shrink-0 text-teal" />
         <div>
-          <span className="font-bold text-teal">권장 분산 진입 시간(골든타임): {forecast.goldenTime}</span>
+          <strong className="font-bold text-ink">권장 분산 진입 시간(골든타임): {forecast.goldenTime}</strong>
           <p className="mt-0.5 text-stone-600">{forecast.goldenTimeReason}</p>
         </div>
       </div>
@@ -40,9 +40,9 @@ export function CongestionForecast({
           const isHigh = item.level === "혼잡" || item.level === "매우혼잡";
           const barColor =
             item.level === "매우혼잡"
-              ? "bg-rose-500"
+              ? "bg-rust"
               : item.level === "혼잡"
-              ? "bg-amber-500"
+              ? "bg-gold"
               : item.level === "보통"
               ? "bg-teal/70"
               : "bg-teal";
@@ -50,7 +50,7 @@ export function CongestionForecast({
           return (
             <div
               key={item.timeLabel}
-              className="flex flex-col items-center rounded border border-line/60 bg-white/60 p-2 text-center"
+              className="flex flex-col items-center rounded border border-line/50 bg-white/50 p-2 text-center"
             >
               <span className="text-[11px] font-medium text-stone-600">{item.timeLabel}</span>
               
@@ -64,25 +64,25 @@ export function CongestionForecast({
               <div className="flex items-center gap-0.5">
                 {item.bottleneckRisk && (
                   <span title="산간 병목 주의" className="inline-flex">
-                    <Warning size={11} weight="fill" className="text-rose-500" />
+                    <Warning size={12} weight="fill" className="text-rust" />
                   </span>
                 )}
                 <span
                   className={`text-[10px] font-bold ${
-                    isHigh ? "text-rose-600 dark:text-rose-400" : "text-stone-700"
+                    isHigh ? "text-rust" : "text-ink"
                   }`}
                 >
                   {item.level}
                 </span>
               </div>
-              <span className="mt-0.5 text-[9px] text-stone-400">{item.congestionScore}점</span>
+              <span className="mt-0.5 text-[9px] text-stone-500">{item.congestionScore}점</span>
             </div>
           );
         })}
       </div>
 
-      <div className="mt-2.5 flex items-center gap-1.5 text-[10px] text-stone-500">
-        <Info size={12} className="shrink-0 text-teal" />
+      <div className="mt-3 flex items-center gap-1.5 text-[10px] text-stone-500">
+        <Info size={13} className="shrink-0 text-teal" />
         <span>관광 집중률 데이터에 주말 피크 계수 및 산간 1차선 병목 민감도를 반영한 시간대별 시계열 예측치입니다.</span>
       </div>
     </div>
