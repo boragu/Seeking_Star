@@ -48,14 +48,18 @@ export function scoreDestination(
     breakdown.travel = Math.round(clamp(100 - (destination.travelMinutesEstimate / 240) * 45));
   }
 
-  // 3. 인근 캠핑/차박 편의
+  // 3. 인근 캠핑/차박 편의 (반경 20km 내 캠핑장 수 + 근접 거리 보너스)
   if (destination.nearbyCampgrounds && destination.nearbyCampgrounds.length > 0) {
-    breakdown.camping = Math.round(clamp(60 + Math.min(5, destination.nearbyCampgrounds.length) * 8));
+    const closestKm = Math.min(...destination.nearbyCampgrounds.map((c) => c.distanceKm ?? 20));
+    const proximityBonus = closestKm <= 5 ? 10 : closestKm <= 10 ? 5 : 0;
+    breakdown.camping = Math.round(clamp(60 + Math.min(5, destination.nearbyCampgrounds.length) * 6 + proximityBonus));
   }
 
-  // 4. 연관 관광 연계성
+  // 4. 연관 관광 연계성 (연관 관광지 수 + 빅데이터 상위 연계 순위 보너스)
   if (destination.relatedPlaces && destination.relatedPlaces.length > 0) {
-    breakdown.sightseeing = Math.round(clamp(60 + Math.min(5, destination.relatedPlaces.length) * 8));
+    const hasTopRank = destination.relatedPlaces.some((p) => p.rank !== undefined && p.rank !== null && p.rank <= 3);
+    const rankBonus = hasTopRank ? 8 : 0;
+    breakdown.sightseeing = Math.round(clamp(60 + Math.min(5, destination.relatedPlaces.length) * 6 + rankBonus));
   }
 
   if (destination.cloud !== null) breakdown.sky = Math.round(clamp(100 - destination.cloud));

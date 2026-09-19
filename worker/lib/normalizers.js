@@ -59,6 +59,10 @@ export function normalizeTourismItem(item) {
     contentTypeId: firstValue(item, ["contenttypeid", "contentTypeId"]),
     tel: firstValue(item, ["tel"]),
     modifiedAt: firstValue(item, ["modifiedtime", "modifiedTime"]),
+    readcount: toNumber(firstValue(item, ["readcount", "readCount"])),
+    cat1: firstValue(item, ["cat1"]),
+    cat2: firstValue(item, ["cat2"]),
+    cat3: firstValue(item, ["cat3"]),
     source: "KorService2",
   };
 }
@@ -107,6 +111,7 @@ export function normalizeCampingItem(item) {
     longitude: point.longitude,
     imageUrl: firstValue(item, ["firstImageUrl", "firstimage", "firstImage"]),
     homepage: firstValue(item, ["homepage"]),
+    resveUrl: firstValue(item, ["resveUrl", "resveCl"]),
     source: "GoCamping",
   };
 }
@@ -122,6 +127,7 @@ export function normalizeRelatedItem(item) {
     address: compactAddress(firstValue(item, ["addr1"]), firstValue(item, ["addr2"])),
     latitude: point.latitude,
     longitude: point.longitude,
+    rank: toNumber(firstValue(item, ["rlteRank", "rank", "rnum"])),
     source: "TarRlteTarService1",
   };
 }

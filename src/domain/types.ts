@@ -10,6 +10,9 @@ export interface NearbyPlace {
   latitude: number | null;
   longitude: number | null;
   distanceKm: number | null;
+  homepage?: string | null;
+  resveUrl?: string | null;
+  rank?: number | null;
   source: string;
 }
 
@@ -25,6 +28,10 @@ export interface Destination {
   contentTypeId: string | null;
   tel: string | null;
   modifiedAt: string | null;
+  readcount?: number | null;
+  cat1?: string | null;
+  cat2?: string | null;
+  cat3?: string | null;
   source: "KorService2";
   concentrationRate: number | null;
   concentrationDate: string | null;
