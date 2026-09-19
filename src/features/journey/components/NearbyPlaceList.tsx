@@ -1,20 +1,49 @@
 import { ArrowSquareOut, MapPin, Sparkle } from "@phosphor-icons/react";
+import { Skeleton } from "../../../components/ui/Skeleton";
 import type { NearbyPlace } from "../../../domain/types";
 
 export function NearbyPlaceList({
   title,
   items,
   empty,
+  loading = false,
 }: {
   title: string;
   items: NearbyPlace[];
   empty: string;
+  loading?: boolean;
 }) {
   return (
     <section className="min-w-0 overflow-hidden border border-line bg-white/45 p-6 shadow-[0_16px_45px_rgba(68,49,29,.05)] max-sm:p-5">
-      <h2 className="font-display text-[20px] font-bold">{title}</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="font-display text-[20px] font-bold">{title}</h2>
+        {loading && (
+          <span className="flex items-center gap-1 text-[11px] text-teal">
+            <Sparkle size={12} className="animate-spin" />
+            <span>조회 중…</span>
+          </span>
+        )}
+      </div>
       <div className="mt-4 divide-y divide-line">
-        {items.length ? (
+        {loading ? (
+          [1, 2, 3].map((i) => (
+            <div key={i} className="py-3.5 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-16 rounded" />
+                </div>
+                <Skeleton className="h-4 w-12" />
+              </div>
+              <Skeleton className="h-3 w-48" />
+              <div className="flex items-center gap-1.5 pt-0.5">
+                <Skeleton className="h-4 w-14 rounded" />
+                <Skeleton className="h-4 w-16 rounded" />
+                <Skeleton className="h-4 w-16 rounded" />
+              </div>
+            </div>
+          ))
+        ) : items.length ? (
           items.map((place) => {
             // Split comma-separated category strings into individual tags
             const categories = place.category

@@ -88,6 +88,31 @@ export function DestinationSpotlightSkeleton() {
           <Skeleton className="h-12 w-full sm:w-1/2 rounded-lg" />
         </div>
       </div>
+
+      {/* 하단 추천 후보 목록 스켈레톤 */}
+      <div className="mt-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+        <div className="grid grid-cols-2 gap-2.5 max-sm:grid-cols-1">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex items-center justify-between border border-line bg-white/40 p-3 rounded">
+              <div className="flex items-center gap-2">
+                <Skeleton rounded="full" className="size-7" />
+                <div className="space-y-1">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              </div>
+              <div className="space-y-1 text-right">
+                <Skeleton className="h-4 w-10 ml-auto" />
+                <Skeleton className="h-2.5 w-12 ml-auto" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

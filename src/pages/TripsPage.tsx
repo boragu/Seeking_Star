@@ -11,6 +11,7 @@ import { JourneyTimeline, type TimelineStop } from "../features/journey/componen
 import { NearbyPlaceList } from "../features/journey/components/NearbyPlaceList";
 import { ObservationGuide } from "../features/journey/components/ObservationGuide";
 import { SavedJourneyList } from "../features/journey/components/SavedJourneyList";
+import { JourneyDetailSkeleton } from "../features/journey/components/JourneyDetailSkeleton";
 import { AiJourneyBriefing } from "../features/ai/components/AiJourneyBriefing";
 import { useShareJourney } from "../features/journey/useShareJourney";
 import { addMinutesToTime, formatDateInputKorean } from "../lib/currentContext";
@@ -21,6 +22,7 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
     setPlanner,
     destination,
     route,
+    recommendations: { status: recommendationStatus },
     journey: {
       selectedId,
       setSelectedId,
@@ -204,7 +206,9 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
         {/* 탭 1: 현재 여정 상세 보기 */}
         {activeTab === "detail" && (
           <>
-            {!destination ? (
+            {recommendationStatus === "loading" ? (
+              <JourneyDetailSkeleton />
+            ) : !destination ? (
               <div className="py-12">
                 <EmptyState
                   title="선택된 활성 여정이 없습니다"
