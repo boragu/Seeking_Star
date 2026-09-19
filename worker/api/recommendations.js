@@ -121,7 +121,7 @@ export async function getRecommendations(request, env) {
       origin: origin.latitude === null ? null : origin,
       region: defaultRegion.label,
       tourAreaCode,
-      areaCd,
+      areaCd: concentrationAreaCd,
       signguCd: requestedSignguCd || defaultRegion.concentrationSignguCode,
       baseYm,
     },
