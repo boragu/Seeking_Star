@@ -46,8 +46,8 @@ export function NearbyPlaceList({
                       {place.name}
                     </strong>
                     {place.rank !== undefined && place.rank !== null && (
-                      <span className="inline-flex items-center gap-0.5 rounded border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-300">
-                        <Sparkle size={10} weight="fill" />
+                      <span className="inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-100/80 px-1.5 py-0.5 text-[10px] font-bold text-amber-950 shadow-xs">
+                        <Sparkle size={11} weight="fill" className="text-amber-700 shrink-0" />
                         빅데이터 연계 {place.rank}위
                       </span>
                     )}
