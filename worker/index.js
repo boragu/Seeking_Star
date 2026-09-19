@@ -1,4 +1,5 @@
 import { getRecommendations } from "./api/recommendations.js";
+import { callOpenAiCompatible } from "./api/ai.js";
 import { createPublicDataClient, PublicDataError } from "./lib/public-data-client.js";
 import { publicCatalog } from "./lib/public-data-registry.js";
 import { createOpenApiDocument } from "./openapi.js";
@@ -15,7 +16,7 @@ function jsonResponse(payload, init = {}) {
 function errorResponse(error) {
   const publicError = error instanceof PublicDataError
     ? error
-    : new PublicDataError("서버에서 요청을 처리하지 못했습니다.", {
+    : new PublicDataError(error instanceof Error ? error.message : "서버에서 요청을 처리하지 못했습니다.", {
       code: "INTERNAL_ERROR",
       status: 500,
     });
@@ -30,8 +31,23 @@ function errorResponse(error) {
 
 async function routeApi(request, env) {
   const url = new URL(request.url);
+
+  if (request.method === "POST" && url.pathname === "/api/ai/guide") {
+    try {
+      const body = await request.json();
+      const messages = body.messages || [];
+      const aiContent = await callOpenAiCompatible(messages, env, {
+        temperature: 0.7,
+        max_tokens: 1000,
+      });
+      return jsonResponse({ content: aiContent });
+    } catch (err) {
+      return jsonResponse({ error: { message: err.message } }, { status: 500 });
+    }
+  }
+
   if (request.method !== "GET") {
-    return errorResponse(new PublicDataError("GET 요청만 지원합니다.", { code: "METHOD_NOT_ALLOWED", status: 405 }));
+    return errorResponse(new PublicDataError("GET 또는 POST 요청만 지원합니다.", { code: "METHOD_NOT_ALLOWED", status: 405 }));
   }
 
   if (url.pathname === "/api/recommendations") {

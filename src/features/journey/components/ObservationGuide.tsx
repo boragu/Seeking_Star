@@ -140,6 +140,22 @@ export function ObservationGuide({
         </div>
       </div>
 
+      {/* 인원 및 이동수단 맞춤 안내 */}
+      <div className="mt-4 grid grid-cols-2 gap-3 text-[11px] max-md:grid-cols-1">
+        <div className="rounded bg-paper/60 p-3 border border-line/50">
+          <strong className="block text-teal font-bold mb-1">
+            👥 동행 인원 맞춤 조언 ({planner.people === "4" ? "4인 이상" : `${planner.people}인`})
+          </strong>
+          <p className="text-stone-700 leading-relaxed">{guide.peopleAdvice}</p>
+        </div>
+        <div className="rounded bg-paper/60 p-3 border border-line/50">
+          <strong className="block text-amber-800 font-bold mb-1">
+            🚗 {planner.transport === "rental" ? "렌터카 주행 가이드" : "자가용 주행 가이드"}
+          </strong>
+          <p className="text-stone-700 leading-relaxed">{guide.transportAdvice}</p>
+        </div>
+      </div>
+
       <div className="mt-4 rounded bg-paper/60 p-3 text-[11px]">
         <div className="flex items-center gap-1.5 font-bold text-stone-700">
           <ShieldCheck size={16} /> 현장 에티켓 및 안전 수칙

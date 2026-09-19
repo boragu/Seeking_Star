@@ -6,7 +6,7 @@ import { AlertSettings } from "../features/alerts/components/AlertSettings";
 import { useAlertPreferences } from "../features/alerts/useAlertPreferences";
 
 export function AlertsPage({ navigate }: { navigate: Navigate }) {
-  const { destination } = useApp();
+  const { destination, planner } = useApp();
   const preferences = useAlertPreferences(destination);
   return (
     <AppPage path="/alerts" navigate={navigate}>
@@ -27,7 +27,7 @@ export function AlertsPage({ navigate }: { navigate: Navigate }) {
             saved={preferences.saved}
             testSent={preferences.testSent}
             save={() => preferences.save(destination)}
-            triggerTestAlert={() => preferences.triggerTestAlert(destination)}
+            triggerTestAlert={() => preferences.triggerTestAlert(destination, planner.departure)}
           />
         </div>
       </main>

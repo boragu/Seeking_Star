@@ -135,30 +135,30 @@ export function PlannerForm({
           </Field>
         </div>
         <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
-          <Field label="인원">
+          <Field label="인원" hint={planner.people === "1" ? "솔로 안심 관측 가중치" : planner.people === "2" ? "커플/2인 맞춤 가중치" : "가족/단체 체류 인프라 우선"}>
             <FieldFrame icon={<UsersThree />}>
               <select
                 className="w-full appearance-none bg-transparent text-[13px] outline-none"
                 value={planner.people}
                 onChange={(event) => update("people", event.target.value as PlannerState["people"])}
               >
-                <option value="1">1명</option>
-                <option value="2">2명</option>
-                <option value="3">3명</option>
-                <option value="4">4명 이상</option>
+                <option value="1">1명 (나홀로 관측)</option>
+                <option value="2">2명 (커플/친구)</option>
+                <option value="3">3명 (가족/소그룹)</option>
+                <option value="4">4명 이상 (단체/동호회)</option>
               </select>
               <CaretDown />
             </FieldFrame>
           </Field>
-          <Field label="이동 수단">
+          <Field label="이동 수단" hint={planner.transport === "rental" ? "렌터카 주행 및 도로편의 우선" : "자가용 고지대 진입 가이드"}>
             <FieldFrame icon={<Car />}>
               <select
                 className="w-full appearance-none bg-transparent text-[13px] outline-none"
                 value={planner.transport}
                 onChange={(event) => update("transport", event.target.value as PlannerState["transport"])}
               >
-                <option value="car">자가용</option>
-                <option value="rental">렌터카</option>
+                <option value="car">자가용 운행</option>
+                <option value="rental">렌터카 이용</option>
               </select>
               <CaretDown />
             </FieldFrame>
@@ -172,7 +172,7 @@ export function PlannerForm({
             onChange={(event) => update("accessibility", event.target.checked)}
           />
           <Wheelchair size={18} className="text-teal" />
-          <span>무장애 편의시설 보유 장소 우선 안내</span>
+          <span>무장애(Barrier-Free) 편의시설 보유 장소 우선 안내</span>
         </label>
         <Button className="w-full" variant="primary" onClick={handleSubmit} disabled={status === "loading"}>
           추천 장소 조회 <ArrowRight />

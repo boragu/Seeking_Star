@@ -1,7 +1,8 @@
-import { CheckCircle, Clock, Sparkle, UserCheck } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
+import { ArrowClockwise, CheckCircle, Clock, Sparkle, UserCheck } from "@phosphor-icons/react";
 import { AiBadge } from "../../../components/ui/AiBadge";
 import type { Destination, PlannerState } from "../../../domain/types";
-import { generateAiJourneyBriefing } from "../aiStargazingService";
+import { generateAiJourneyBriefing, requestAiEnhancedGuide } from "../aiStargazingService";
 
 export function AiJourneyBriefing({
   destination,
@@ -10,7 +11,37 @@ export function AiJourneyBriefing({
   destination: Destination;
   planner: PlannerState;
 }) {
-  const briefing = generateAiJourneyBriefing(destination, planner);
+  const [llmText, setLlmText] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [refreshKey, setRefreshKey] = useState<number>(0);
+
+  // 로컬 룰 기반 브리핑 (즉시 렌더링 및 Fallback)
+  const localBriefing = generateAiJourneyBriefing(destination, planner);
+
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
+    setIsLoading(true);
+    requestAiEnhancedGuide(destination, planner, controller.signal)
+      .then((content) => {
+        if (isMounted) {
+          setLlmText(content);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setLlmText(null);
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [destination.id, planner.departure, planner.date, planner.people, planner.transport, planner.accessibility, refreshKey]);
 
   return (
     <div className="mt-4 border border-line bg-gradient-to-br from-paper via-paper/80 to-teal/5 p-4 shadow-[0_8px_30px_rgba(68,49,29,.04)]">
@@ -22,29 +53,59 @@ export function AiJourneyBriefing({
               초개인화 맞춤 여정 브리핑
             </h3>
           </div>
-          <AiBadge label="AI 맞춤 브리핑" variant="teal" />
+          {llmText ? (
+            <AiBadge label="vLLM AI 실시간 생성" variant="gold" />
+          ) : isLoading ? (
+            <AiBadge label="AI 생성 중..." variant="teal" />
+          ) : (
+            <AiBadge label="스마트 브리핑" variant="teal" />
+          )}
         </div>
-        <span className="shrink-0 text-[10px] text-stone-500">
-          {planner.departure} 출발 · {planner.date || "선택일자"} 기준
-        </span>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setRefreshKey((k) => k + 1)}
+            disabled={isLoading}
+            className="inline-flex items-center gap-1 text-[10px] font-medium text-stone-500 hover:text-teal disabled:opacity-50 transition"
+            title="AI 브리핑 다시 생성"
+          >
+            <ArrowClockwise size={12} className={isLoading ? "animate-spin text-teal" : ""} />
+            <span>{isLoading ? "생성 중" : "다시 생성"}</span>
+          </button>
+          <span className="shrink-0 text-[10px] text-stone-400">
+            {planner.departure} 출발 · {planner.date || "선택일자"} 기준
+          </span>
+        </div>
       </div>
 
-      <p className="mt-2.5 text-[11px] leading-relaxed text-stone-700">
-        {briefing.personaSummary}
-      </p>
+      {/* 브리핑 본문: vLLM 응답 또는 로컬 템플릿 */}
+      <div className="mt-2.5 min-h-[40px]">
+        {isLoading && !llmText ? (
+          <div className="space-y-1.5 py-1 animate-pulse">
+            <div className="h-3 w-4/5 rounded bg-teal/15" />
+            <div className="h-3 w-full rounded bg-stone-200" />
+            <div className="h-3 w-2/3 rounded bg-stone-200" />
+          </div>
+        ) : (
+          <p className="text-[11px] leading-relaxed text-stone-700">
+            {llmText || localBriefing.personaSummary}
+          </p>
+        )}
+      </div>
 
       {/* 출발 타이밍 조언 뱃지 */}
       <div className="mt-3 flex items-start gap-2 rounded border border-gold/30 bg-gold/10 p-2.5 text-[11px] text-ink">
         <Clock size={16} weight="fill" className="mt-0.5 shrink-0 text-gold-dark dark:text-gold-light" />
         <div>
           <strong className="font-bold text-gold-dark dark:text-gold-light">골든 출발 타이밍 가이드:</strong>
-          <span className="ml-1 text-stone-700 dark:text-stone-300">{briefing.departureTimingAdvice}</span>
+          <span className="ml-1 text-stone-700 dark:text-stone-300">{localBriefing.departureTimingAdvice}</span>
         </div>
       </div>
 
       {/* 맞춤 분석 포인트 리스트 */}
       <div className="mt-3 space-y-1.5">
-        {briefing.goldenKeyPoints.map((point, idx) => (
+        {localBriefing.goldenKeyPoints.map((point, idx) => (
           <div
             key={idx}
             className="flex items-start gap-2 rounded bg-white/60 p-2 text-[11px] leading-relaxed text-stone-700"

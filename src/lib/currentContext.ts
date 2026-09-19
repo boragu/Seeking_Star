@@ -135,3 +135,154 @@ export function formatAccuracy(accuracy: number): string {
   if (accuracy < 1000) return `약 ${Math.max(10, Math.round(accuracy / 10) * 10)}m 정확도`;
   return `약 ${(accuracy / 1000).toFixed(1)}km 정확도`;
 }
+
+export interface MoonPhaseInfo {
+  age: number; // 월령 일수 (0.0 ~ 29.5)
+  phaseName: string; // 삭, 초승달, 상현달, 보름달, 하현달, 그믐달
+  phaseIcon: string; // 🌑, 🌒, 🌓, 🌕, 🌗, 🌘
+  illumination: number; // 광도율 % (0 ~ 100)
+  interferenceLevel: "none" | "low" | "medium" | "high";
+  interferenceLabel: string;
+  optimalViewingAdvice: string;
+}
+
+/** Julian Day 기반 천문 정밀 월령 및 달빛 간섭도 계산 */
+export function calculateMoonPhase(dateInput: Date | string = new Date()): MoonPhaseInfo {
+  const date = typeof dateInput === "string" ? new Date(`${dateInput}T12:00:00+09:00`) : dateInput;
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  // Julian Day 계산
+  let y = year;
+  let m = month;
+  if (m <= 2) {
+    y -= 1;
+    m += 12;
+  }
+  const a = Math.floor(y / 100);
+  const b = 2 - a + Math.floor(a / 4);
+  const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524.5;
+
+  // 2000-01-06 18:14 UTC 기준 신월 (JD 2451549.5)
+  const synodicMonth = 29.53058867;
+  const daysSinceNew = (jd - 2451549.5) % synodicMonth;
+  const age = (daysSinceNew < 0 ? daysSinceNew + synodicMonth : daysSinceNew);
+
+  // 달빛 조도율 (0 ~ 100%)
+  const illumination = Math.round(0.5 * (1 - Math.cos((2 * Math.PI * age) / synodicMonth)) * 100);
+
+  let phaseName = "삭(신월)";
+  let phaseIcon = "🌑";
+  let interferenceLevel: MoonPhaseInfo["interferenceLevel"] = "none";
+  let interferenceLabel = "달빛 간섭 없음 (최적 관측)";
+  let optimalViewingAdvice = "달빛이 없어 은하수와 성운·성단을 관측하기에 최고의 날입니다.";
+
+  if (age < 1.5 || age >= 28.2) {
+    phaseName = "삭(신월)";
+    phaseIcon = "🌑";
+    interferenceLevel = "none";
+    interferenceLabel = "달빛 간섭 없음 (최적)";
+    optimalViewingAdvice = "월광이 전혀 없어 어두운 밤하늘과 은하수 중심부 촬영에 최적기입니다.";
+  } else if (age < 6.5) {
+    phaseName = "초승달";
+    phaseIcon = "🌒";
+    interferenceLevel = "low";
+    interferenceLabel = "달빛 간섭 낮음 (초저녁 후 최적)";
+    optimalViewingAdvice = "초저녁 서쪽으로 달이 지므로, 밤 21시 이후부터 쾌적한 암흑 밤하늘이 펼쳐집니다.";
+  } else if (age < 8.5) {
+    phaseName = "상현달";
+    phaseIcon = "🌓";
+    interferenceLevel = "medium";
+    interferenceLabel = "달빛 간섭 보통 (자정 이후 최적)";
+    optimalViewingAdvice = "자정 무렵 달이 지므로, 자정 이후 심야 시간대 은하수 관측을 권장합니다.";
+  } else if (age < 13.5) {
+    phaseName = "차오르는 달(상현망간)";
+    phaseIcon = "🌔";
+    interferenceLevel = "high";
+    interferenceLabel = "달빛 간섭 다소 높음";
+    optimalViewingAdvice = "달빛이 밝아 행성(목성·토성) 및 달 표면 관측에 유리하며, 딥스카이는 새벽 달 진 후 권장합니다.";
+  } else if (age < 16.5) {
+    phaseName = "보름달(만월)";
+    phaseIcon = "🌕";
+    interferenceLevel = "high";
+    interferenceLabel = "달빛 간섭 높음 (만월)";
+    optimalViewingAdvice = "밤새 달빛이 밝아 달·행성 중심 관측을 추천하며, 은하수 촬영은 빛 차단 후드가 필요합니다.";
+  } else if (age < 21.5) {
+    phaseName = "이지러지는 달(하현망간)";
+    phaseIcon = "🌖";
+    interferenceLevel = "medium";
+    interferenceLabel = "달빛 간섭 보통 (초저녁 최적)";
+    optimalViewingAdvice = "달이 밤 23시 이후 늦게 뜨므로, 일몰 후부터 밤 23시까지의 골든아워 관측을 권장합니다.";
+  } else if (age < 23.5) {
+    phaseName = "하현달";
+    phaseIcon = "🌗";
+    interferenceLevel = "low";
+    interferenceLabel = "달빛 간섭 낮음 (자정 전 최적)";
+    optimalViewingAdvice = "자정 무렵 달이 동쪽에서 뜨기 전, 초저녁부터 밤 23시 사이에 별빛 관측이 쾌적합니다.";
+  } else {
+    phaseName = "그믐달";
+    phaseIcon = "🌘";
+    interferenceLevel = "none";
+    interferenceLabel = "달빛 간섭 미미 (새벽 전 최적)";
+    optimalViewingAdvice = "새벽 동트기 직전까지 달빛 없는 고요한 밤하늘을 온전히 누릴 수 있습니다.";
+  }
+
+  return {
+    age: Math.round(age * 10) / 10,
+    phaseName,
+    phaseIcon,
+    illumination,
+    interferenceLevel,
+    interferenceLabel,
+    optimalViewingAdvice,
+  };
+}
+
+export interface SeasonalConstellationInfo {
+  season: "봄" | "여름" | "가을" | "겨울";
+  targetConstellations: string;
+  milkyWayDirection: string;
+  optimalTimeWindow: string;
+  astronomicalTwilight: string;
+}
+
+/** 계절 및 시간 기반 밤하늘 관측 대상 및 천문박명 시간 계산 */
+export function calculateAstronomicalConditions(dateInput: Date | string = new Date()): SeasonalConstellationInfo {
+  const date = typeof dateInput === "string" ? new Date(`${dateInput}T12:00:00+09:00`) : dateInput;
+  const month = date.getMonth() + 1;
+
+  if (month >= 3 && month <= 5) {
+    return {
+      season: "봄",
+      targetConstellations: "사자자리 · 처녀자리 · 목동자리 (봄의 대곡선)",
+      milkyWayDirection: "새벽 03시경 남동쪽 지평선 위 은하수 등장",
+      optimalTimeWindow: "밤 21:00 ~ 익일 01:30",
+      astronomicalTwilight: "일몰 후 약 1시간 40분 뒤 (완전 암전)",
+    };
+  } else if (month >= 6 && month <= 8) {
+    return {
+      season: "여름",
+      targetConstellations: "백조자리 · 거문고자리 · 독수리자리 (여름철 대삼각형) & 궁수자리 은하수 중심부",
+      milkyWayDirection: "남동쪽~남서쪽 하늘을 가로지르는 짙은 은하수 아치",
+      optimalTimeWindow: "밤 22:30 ~ 익일 02:30 (은하수 최고 고도)",
+      astronomicalTwilight: "밤 21:40경 천문박명 종료 (완전 암전)",
+    };
+  } else if (month >= 9 && month <= 11) {
+    return {
+      season: "가을",
+      targetConstellations: "페가수스자리 · 안드로메다 은하(M31) · 카시오페이아자리 · 페르세우스 이중성단",
+      milkyWayDirection: "초저녁 서남쪽에서 북동쪽으로 이어지는 가을 은하수",
+      optimalTimeWindow: "밤 20:30 ~ 익일 01:00",
+      astronomicalTwilight: "밤 20:00경 천문박명 종료 (빠른 밤하늘 형성)",
+    };
+  } else {
+    return {
+      season: "겨울",
+      targetConstellations: "오리온자리(M42 대성운) · 황소자리(플레이아데스 성단) · 큰개자리(시리우스) (겨울철 대육각형)",
+      milkyWayDirection: "천정을 가로지르는 맑고 투명한 겨울 은하수",
+      optimalTimeWindow: "밤 19:30 ~ 익일 00:30",
+      astronomicalTwilight: "밤 19:10경 천문박명 종료 (가장 긴 관측 시간)",
+    };
+  }
+}

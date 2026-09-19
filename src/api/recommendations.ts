@@ -5,6 +5,9 @@ export async function fetchRecommendations(planner: PlannerState, signal?: Abort
   const query = new URLSearchParams({
     date: planner.date,
     departureTime: planner.time,
+    people: planner.people,
+    transport: planner.transport,
+    accessibility: String(planner.accessibility),
   });
   if (planner.latitude !== null && planner.longitude !== null) {
     query.set("latitude", String(planner.latitude));

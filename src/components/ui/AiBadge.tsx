@@ -16,7 +16,7 @@ export function AiBadge({
 }: AiBadgeProps) {
   const variantStyles = {
     teal: "bg-teal/10 text-teal border-teal/20",
-    gold: "bg-gold/15 text-gold-dark border-gold/30 dark:text-gold-light",
+    gold: "bg-amber-100/80 text-amber-900 border-amber-300",
     dark: "bg-white/10 text-gold-light border-white/20 shadow-xs",
     subtle: "bg-stone-100 text-stone-600 border-stone-200",
   };

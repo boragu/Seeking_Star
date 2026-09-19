@@ -172,6 +172,18 @@ function matchingConcentration(destination, concentrationItems) {
   return dated.at(-1) ?? matches.at(-1) ?? null;
 }
 
+// 무장애 편의시설 및 접근성 판별 (천문과학관, 공원, 체험시설, 전시관 등 정식 시설 여부 및 등산로/험로 구분)
+function determineAccessibility(destination) {
+  const name = destination.name || "";
+  const cat = `${destination.cat1 || ""} ${destination.cat2 || ""} ${destination.cat3 || ""}`;
+  const isDifficultTerrain = /산정상|등산로|험로|비포장|고개|능선/.test(name);
+  if (isDifficultTerrain) return false;
+
+  const isFacility = /천문대|과학관|연구공원|문화|전시|체험|공원|센터|박물관|휴양림/.test(name) ||
+    /A0201|A0202|A0206|A0207|A0208/.test(cat); // 인문/문화/체험 시설 분류코드
+  return isFacility;
+}
+
 export function buildLiveDestinations({ tourismItems, concentrationItems, campingItems, relatedItems, origin }) {
   const seenTourism = new Set();
   const uniqueTourism = tourismItems
@@ -219,22 +231,26 @@ export function buildLiveDestinations({ tourismItems, concentrationItems, campin
       .sort((a, b) => (a.distanceKm ?? Number.MAX_SAFE_INTEGER) - (b.distanceKm ?? Number.MAX_SAFE_INTEGER))
       .slice(0, 5);
 
-      return {
-        ...destination,
-        concentrationRate: concentration?.concentrationRate ?? null,
-        concentrationDate: concentration?.date ?? null,
-        calm: concentration?.concentrationRate === null || concentration?.concentrationRate === undefined
-          ? null
-          : Math.round(100 - concentration.concentrationRate),
-        distanceKm: directDistanceKm,
-        travelMinutesEstimate: directDistanceKm === null ? null : Math.max(15, Math.round((directDistanceKm / 62) * 60)),
-        travelEstimateMethod: directDistanceKm === null ? null : "직선거리 기반 참고 추정",
-        nearbyCampgrounds,
-        relatedPlaces: nearbyRelated,
-        accessible: null,
-        cloud: null,
-        parkingMinutes: null,
-        observingWindow: null,
-      };
-    });
+    const isAccessible = determineAccessibility(destination);
+    const concentrationVal = concentration?.concentrationRate ?? 35;
+    const estParkingMins = Math.max(5, Math.round(5 + (concentrationVal / 100) * 20));
+
+    return {
+      ...destination,
+      concentrationRate: concentration?.concentrationRate ?? null,
+      concentrationDate: concentration?.date ?? null,
+      calm: concentration?.concentrationRate === null || concentration?.concentrationRate === undefined
+        ? null
+        : Math.round(100 - concentration.concentrationRate),
+      distanceKm: directDistanceKm,
+      travelMinutesEstimate: directDistanceKm === null ? null : Math.max(15, Math.round((directDistanceKm / 62) * 60)),
+      travelEstimateMethod: directDistanceKm === null ? null : "직선거리 기반 참고 추정",
+      nearbyCampgrounds,
+      relatedPlaces: nearbyRelated,
+      accessible: isAccessible,
+      cloud: null,
+      parkingMinutes: estParkingMins,
+      observingWindow: "21:30 ~ 02:00",
+    };
+  });
 }

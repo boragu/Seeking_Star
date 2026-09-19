@@ -113,6 +113,9 @@ export async function getRecommendations(request, env) {
     query: {
       date: url.searchParams.get("date"),
       departureTime: url.searchParams.get("departureTime"),
+      people: url.searchParams.get("people") || "2",
+      transport: url.searchParams.get("transport") || "car",
+      accessibility: url.searchParams.get("accessibility") === "true",
       origin: origin.latitude === null ? null : origin,
       region: defaultRegion.label,
       tourAreaCode,

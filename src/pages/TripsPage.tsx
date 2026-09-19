@@ -7,7 +7,7 @@ import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
 import { PageHeading } from "../components/ui/PageHeading";
 import { JourneyFacts } from "../features/journey/components/JourneyFacts";
-import { JourneyTimeline } from "../features/journey/components/JourneyTimeline";
+import { JourneyTimeline, type TimelineStop } from "../features/journey/components/JourneyTimeline";
 import { NearbyPlaceList } from "../features/journey/components/NearbyPlaceList";
 import { ObservationGuide } from "../features/journey/components/ObservationGuide";
 import { SavedJourneyList } from "../features/journey/components/SavedJourneyList";
@@ -33,6 +33,7 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
   const [activeTab, setActiveTab] = useState<"detail" | "vault">(() => {
     return !destination && savedJourneys.length > 0 ? "vault" : "detail";
   });
+  const [courseType, setCourseType] = useState<"direct" | "sightseeing" | "camping">("direct");
 
   const isCurrentSaved = isSaved(destination?.id);
 
@@ -59,6 +60,76 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
     }
     setActiveTab("detail");
   };
+
+  const topRelated = destination?.relatedPlaces?.[0];
+  const topCampground = destination?.nearbyCampgrounds?.[0];
+  const totalDuration = route ? route.durationMinutes : 60;
+
+  // 코스별 타임라인 스탑 계산
+  const getTimelineStops = (): TimelineStop[] => {
+    if (!destination) return [];
+
+    const baseStops: TimelineStop[] = [
+      {
+        time: planner.time,
+        title: `${planner.departure} 출발`,
+        detail: planner.locationSource === "device" ? "현재 위치에서 출발" : "설정된 출발지에서 출발",
+        tag: "출발",
+      },
+    ];
+
+    if (courseType === "sightseeing" && topRelated) {
+      const midpointTime = addMinutesToTime(planner.time, Math.max(30, Math.round(totalDuration * 0.6)));
+      baseStops.push({
+        time: midpointTime,
+        title: topRelated.name,
+        detail: topRelated.category ? `${topRelated.category} · 주간 연계 방문` : "주변 연계 관광지 경유",
+        tag: "경유지",
+      });
+      const arrivalTime = addMinutesToTime(midpointTime, Math.max(25, Math.round(totalDuration * 0.5)));
+      baseStops.push({
+        time: arrivalTime,
+        title: destination.name,
+        detail: `밤하늘 별빛 및 은하수 집중 관측`,
+        tag: "관측지",
+        isHighlight: true,
+      });
+      return baseStops;
+    }
+
+    if (courseType === "camping" && topCampground) {
+      const arrivalTime = route ? addMinutesToTime(planner.time, route.durationMinutes) : "21:30";
+      baseStops.push({
+        time: arrivalTime,
+        title: destination.name,
+        detail: `밤하늘 별빛 및 천체 관측 진행`,
+        tag: "관측지",
+        isHighlight: true,
+      });
+      const campTime = addMinutesToTime(arrivalTime, 120); // 관측 2시간 후 체류
+      baseStops.push({
+        time: campTime,
+        title: topCampground.name,
+        detail: `반경 ${topCampground.distanceKm?.toFixed(1) ?? "5"}km 안심 합법 야영 및 체류`,
+        tag: "숙박·체류",
+      });
+      return baseStops;
+    }
+
+    // 기본 직행 코스
+    baseStops.push({
+      time: route ? addMinutesToTime(planner.time, route.durationMinutes) : "도착 예정",
+      title: destination.name,
+      detail: route
+        ? `예상 소요 ${route.duration} (${route.distance})`
+        : "위치 설정을 통해 도착 예정 시간을 확인하세요.",
+      tag: "목적지",
+      isHighlight: true,
+    });
+    return baseStops;
+  };
+
+  const timelineStops = getTimelineStops();
 
   const actions = activeTab === "detail" && destination ? (
     <div className="flex gap-2">
@@ -160,25 +231,54 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
                   />
                 </div>
 
-                <JourneyTimeline
-                  stops={[
-                    {
-                      time: planner.time,
-                      title: `${planner.departure} 출발`,
-                      detail:
-                        planner.locationSource === "device"
-                          ? "현재 위치에서 출발"
-                          : "설정된 출발지에서 출발",
-                    },
-                    {
-                      time: route ? addMinutesToTime(planner.time, route.durationMinutes) : "미계산",
-                      title: destination.name,
-                      detail: route
-                        ? `예상 소요 ${route.duration} (${route.distance})`
-                        : "위치 설정을 통해 도착 예정 시간을 확인하세요.",
-                    },
-                  ]}
-                />
+                {/* 코스 모드 선택 탭 (직행 vs 연계 관광지 경유 vs 캠핑장 체류) */}
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-white/40 p-3">
+                  <div className="flex items-center gap-1.5 text-[12px] font-bold text-stone-700">
+                    <MapTrifold size={16} className="text-teal" />
+                    <span>여정 코스 선택:</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setCourseType("direct")}
+                      className={`rounded px-3 py-1.5 text-[11px] font-bold transition ${
+                        courseType === "direct"
+                          ? "bg-teal text-white shadow-xs"
+                          : "bg-white/60 text-stone-600 hover:bg-white"
+                      }`}
+                    >
+                      직행 관측 코스
+                    </button>
+                    {topRelated && (
+                      <button
+                        type="button"
+                        onClick={() => setCourseType("sightseeing")}
+                        className={`rounded px-3 py-1.5 text-[11px] font-bold transition ${
+                          courseType === "sightseeing"
+                            ? "bg-teal text-white shadow-xs"
+                            : "bg-white/60 text-stone-600 hover:bg-white"
+                        }`}
+                      >
+                        연계 관광지 경유 (+{topRelated.name.slice(0, 8)})
+                      </button>
+                    )}
+                    {topCampground && (
+                      <button
+                        type="button"
+                        onClick={() => setCourseType("camping")}
+                        className={`rounded px-3 py-1.5 text-[11px] font-bold transition ${
+                          courseType === "camping"
+                            ? "bg-teal text-white shadow-xs"
+                            : "bg-white/60 text-stone-600 hover:bg-white"
+                        }`}
+                      >
+                        야영장 1박 체류 (+{topCampground.name.slice(0, 8)})
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <JourneyTimeline stops={timelineStops} />
 
                 <JourneyFacts destination={destination} />
 

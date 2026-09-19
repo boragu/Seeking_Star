@@ -110,11 +110,10 @@ export function useAlertPreferences(destination?: Destination | null) {
   );
 
   const triggerTestAlert = useCallback(
-    async (targetDest?: Destination | null) => {
+    async (targetDest?: Destination | null, plannerDeparture?: string) => {
       const dest = targetDest !== undefined ? targetDest : destination;
       const timingLabel = timing === "60" ? "1시간" : `${timing}분`;
-      const destName = dest ? dest.name : undefined;
-      const ok = await sendTestNotification(destName, timingLabel);
+      const ok = await sendTestNotification(dest, timingLabel, plannerDeparture);
       setPermission(getNotificationPermission());
       if (ok) {
         setTestSent(true);

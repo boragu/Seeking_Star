@@ -1,3 +1,5 @@
+import type { Destination } from "../../domain/types";
+
 export type NotificationPermissionState = NotificationPermission | "unsupported";
 
 export function isNotificationSupported(): boolean {
@@ -93,16 +95,32 @@ export async function sendStargazingNotification(
   }
 }
 
-export async function sendTestNotification(destinationName?: string, timingLabel?: string): Promise<boolean> {
-  const target = destinationName || "영월 별마로 천문대";
+export async function sendTestNotification(
+  destination?: Destination | null,
+  timingLabel?: string,
+  plannerDeparture?: string
+): Promise<boolean> {
+  const target = destination?.name || "영월 별마로 천문대";
   const timing = timingLabel || "30분";
-  const title = `✨ [별보러간다] ${target} 출발 ${timing} 전 알림`;
-  const body = `현재 혼잡도가 낮고 관측 조건이 쾌적합니다. 안전하고 고요한 별빛 여정을 시작하세요!`;
+  const calmVal = destination?.calm ?? 82;
+  const distanceStr = destination?.distanceKm ? ` (${destination.distanceKm.toFixed(1)}km)` : "";
+  const departureName = plannerDeparture || "출발지";
+
+  const title = `✨ [별보러간다] ${target} 출발 ${timing} 전 혼잡도 알림`;
+  let body = "";
+
+  if (calmVal >= 75) {
+    body = `${departureName} 기준 이동 소요시간${distanceStr} 정상. 현재 한적도 ${calmVal}점으로 야간 방문객 집중 없이 쾌적하게 관측할 수 있습니다!`;
+  } else if (calmVal >= 50) {
+    body = `현재 한적도 ${calmVal}점(보통). 주차 및 진입로 여유가 있으니 출발 일정에 맞추어 서행 운전하세요.`;
+  } else {
+    body = `현재 한적도 ${calmVal}점(집중도 높음). 산간 도로 정체가 예상되니 심야 시간 분산 도착을 권장합니다.`;
+  }
 
   return sendStargazingNotification(title, {
     body,
     tag: `test-alert-${Date.now()}`,
     url: "/alerts",
-    data: { destination: target, timing }
+    data: { destination: target, timing, calm: calmVal }
   });
 }

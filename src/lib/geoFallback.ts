@@ -4,7 +4,7 @@ const EARTH_RADIUS_KM = 6371;
 
 /** 강원특별자치도 및 전국 주요 관측지/공원 기본 좌표 사전 (공공데이터 좌표 누락 시의 안전망) */
 export const KNOWN_DESTINATION_COORDINATES: Record<string, { latitude: number; longitude: number }> = {
-  // 주요 별 관측 명소 및 공원
+  // 1. 강원권 주요 별 관측 명소 및 공원
   "자연환경연구공원": { latitude: 37.7553, longitude: 127.8867 },
   "강원특별자치도 자연환경연구공원": { latitude: 37.7553, longitude: 127.8867 },
   "강원도 자연환경연구공원": { latitude: 37.7553, longitude: 127.8867 },
@@ -22,6 +22,30 @@ export const KNOWN_DESTINATION_COORDINATES: Record<string, { latitude: number; l
   "소양강댐": { latitude: 37.9511, longitude: 127.8189 },
   "화천 평화의댐": { latitude: 38.2458, longitude: 127.8389 },
   "평창 송어축제장": { latitude: 37.6433, longitude: 128.5911 },
+  "바람의언덕": { latitude: 37.1912, longitude: 128.9888 },
+  "태백 바람의언덕": { latitude: 37.1912, longitude: 128.9888 },
+  "매봉산": { latitude: 37.1912, longitude: 128.9888 },
+
+  // 2. 수도권 및 중부권 주요 관측지
+  "중미산천문대": { latitude: 37.5855, longitude: 127.4852 },
+  "송암스페이스센터": { latitude: 37.7476, longitude: 126.9452 },
+  "연천 당포성": { latitude: 38.0163, longitude: 126.9934 },
+  "충주고구려천문과학관": { latitude: 36.9912, longitude: 127.8654 },
+  "보은 보은첨성대": { latitude: 36.4883, longitude: 127.7188 },
+  "단양 소백산천문대": { latitude: 36.9348, longitude: 128.4578 },
+  "소백산천문대": { latitude: 36.9348, longitude: 128.4578 },
+
+  // 3. 영남/호남권 주요 관측지
+  "영양 반딧불이천문대": { latitude: 36.8122, longitude: 129.1352 },
+  "영양반딧불이천문대": { latitude: 36.8122, longitude: 129.1352 },
+  "영천 보현산천문대": { latitude: 36.1627, longitude: 128.9768 },
+  "보현산천문대": { latitude: 36.1627, longitude: 128.9768 },
+  "합천 황매산": { latitude: 35.4952, longitude: 127.9782 },
+  "황매산": { latitude: 35.4952, longitude: 127.9782 },
+  "지리산 정령치": { latitude: 35.3789, longitude: 127.5342 },
+  "정령치": { latitude: 35.3789, longitude: 127.5342 },
+  "장흥 정남진천문과학관": { latitude: 34.6811, longitude: 126.9067 },
+  "무주 반디별천문과학관": { latitude: 35.9456, longitude: 127.7689 },
 
   // 시·군 중심 좌표
   "홍천": { latitude: 37.6972, longitude: 127.8886 },
@@ -60,6 +84,15 @@ export const KNOWN_DESTINATION_COORDINATES: Record<string, { latitude: number; l
   "고성군": { latitude: 38.3806, longitude: 128.4678 },
   "양양": { latitude: 38.0754, longitude: 128.6189 },
   "양양군": { latitude: 38.0754, longitude: 128.6189 },
+  "서울": { latitude: 37.5665, longitude: 126.9780 },
+  "경기": { latitude: 37.4138, longitude: 127.5183 },
+  "충북": { latitude: 36.6357, longitude: 127.4912 },
+  "충남": { latitude: 36.5184, longitude: 126.8000 },
+  "경북": { latitude: 36.5760, longitude: 128.5056 },
+  "경남": { latitude: 35.2383, longitude: 128.6924 },
+  "전북": { latitude: 35.8203, longitude: 127.1088 },
+  "전남": { latitude: 34.8161, longitude: 126.4629 },
+  "제주": { latitude: 33.4996, longitude: 126.5312 },
 };
 
 /** 두 좌표 사이의 하버사인 구면 거리(km) 계산 */
