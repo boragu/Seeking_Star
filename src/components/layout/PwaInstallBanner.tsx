@@ -1,4 +1,4 @@
-import { DownloadSimple, Export, Sparkle, X } from "@phosphor-icons/react";
+import { DownloadSimple, Export, X } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { usePwaInstall } from "../../hooks/usePwaInstall";
 import { Button } from "../ui/Button";
@@ -43,17 +43,18 @@ export function PwaInstallBanner() {
     <>
       <div className="fixed inset-x-3 bottom-20 z-40 mx-auto max-w-lg animate-fade-in md:bottom-6 md:inset-x-auto md:right-6">
         <div className="flex items-center gap-3.5 rounded-2xl border border-gold/30 bg-[#06121ef2] p-4 text-cream shadow-[0_16px_40px_rgba(0,0,0,.45)] backdrop-blur-xl">
-          <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-gold/15 text-gold-light border border-gold/25">
-            <Sparkle size={20} weight="fill" />
-          </div>
+          <img
+            src="/assets/app-icon.png"
+            alt="별보러간다"
+            className="size-10 shrink-0 rounded-xl border border-cream/15 object-cover"
+          />
 
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 font-display text-[13px] font-bold text-cream">
-              <span>별보러간다 앱으로 설치</span>
-              <span className="rounded bg-gold/20 px-1.5 py-0.5 text-[9px] font-medium text-gold-light">PWA</span>
+            <div className="font-display text-[13px] font-bold text-cream">
+              별보러간다 앱으로 설치
             </div>
             <p className="mt-0.5 truncate text-[11px] text-cream/70">
-              홈 화면에 설치하고 실시간 밤하늘 알림을 받아보세요.
+              홈 화면에 추가하여 더 빠르고 편리하게 이용하세요.
             </p>
           </div>
 
