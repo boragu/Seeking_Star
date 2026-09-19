@@ -1,4 +1,4 @@
-import { Bell, BellRinging, CheckCircle, Clock, Info, TrendDown, WarningCircle } from "@phosphor-icons/react";
+import { Bell, BellRinging, Check, CheckCircle, Clock, Info, PaperPlaneTilt, TrendDown, WarningCircle } from "@phosphor-icons/react";
 import { Button } from "../../../components/ui/Button";
 import { SectionHeading } from "../../../components/ui/SectionHeading";
 import type { Destination } from "../../../domain/types";
@@ -20,6 +20,10 @@ export function AlertSettings({
   setTiming,
   permission,
   requestPermission,
+  saved,
+  testSent,
+  save,
+  triggerTestAlert,
 }: {
   destination: Destination | null;
   enabled: boolean;
@@ -28,6 +32,10 @@ export function AlertSettings({
   setTiming: (value: AlertTiming) => void;
   permission: NotificationPermissionState;
   requestPermission: () => Promise<NotificationPermissionState>;
+  saved?: boolean;
+  testSent?: boolean;
+  save?: () => Promise<void>;
+  triggerTestAlert?: () => Promise<boolean>;
 }) {
   const isGranted = permission === "granted";
 
@@ -35,10 +43,10 @@ export function AlertSettings({
     <section className="border border-line bg-white/48 p-7 shadow-[0_20px_60px_rgba(68,49,29,.06)] max-md:p-5">
       <SectionHeading
         number="01"
-        title="알림 설정"
+        title="출발 알림 설정"
         description={
           destination
-            ? `${destination.name}의 혼잡도 변동 시 알림을 전송합니다.`
+            ? `${destination.name}의 혼잡도 변동 시 기기 알림을 전송합니다.`
             : "관측지를 먼저 선택해 주세요."
         }
       />
@@ -151,6 +159,44 @@ export function AlertSettings({
           ))}
         </div>
       </div>
+
+      {save && (
+        <div className="mt-8 flex gap-3 border-t border-line pt-6 max-sm:flex-col">
+          <Button
+            className="flex-1 min-h-11"
+            variant="primary"
+            onClick={() => void save()}
+            disabled={!destination}
+          >
+            {saved ? (
+              <>
+                <Check weight="bold" /> 알림 설정 저장됨
+              </>
+            ) : (
+              <>알림 설정 저장</>
+            )}
+          </Button>
+
+          {triggerTestAlert && (
+            <Button
+              className="border border-line bg-white/70 hover:bg-white text-ink min-h-11"
+              variant="secondary"
+              onClick={() => void triggerTestAlert()}
+              disabled={!destination}
+            >
+              {testSent ? (
+                <>
+                  <Check className="text-teal" weight="bold" /> 테스트 알림 발송됨
+                </>
+              ) : (
+                <>
+                  <PaperPlaneTilt weight="bold" /> 테스트 알림 발송
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+      )}
 
       <p className="mt-5 text-[11px] leading-5 text-stone-500">
         설정은 변경 시 기기에 자동 저장되며, 알림 수신을 위해 브라우저 알림 권한 허용이 필요합니다.
