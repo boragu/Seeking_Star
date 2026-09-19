@@ -3,10 +3,12 @@ import type { RankedDestination, ScoreKey } from "../../../lib/recommendationEng
 
 const scoreLabels: Record<ScoreKey, string> = {
   crowd: "혼잡 분산",
+  travel: "이동 효율",
+  camping: "캠핑 편의",
+  sightseeing: "연관 관광",
+  accessibility: "접근성",
   sky: "관측 여건",
   parking: "주차 편의",
-  travel: "이동 효율",
-  accessibility: "접근성",
 };
 
 export function ScoreBreakdown({ destination }: { destination: RankedDestination }) {
