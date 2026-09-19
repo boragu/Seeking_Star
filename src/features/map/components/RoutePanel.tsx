@@ -111,7 +111,7 @@ export function RoutePanel({
           dark
           icon={TrendDown}
           label="한적도 지수"
-          value={destination.calm === null ? "확인 중" : `${destination.calm}점`}
+          value={destination.calm === null ? "한적 (비과밀)" : `${destination.calm}점`}
         />
         <Metric
           dark

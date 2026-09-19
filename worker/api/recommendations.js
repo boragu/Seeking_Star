@@ -53,7 +53,8 @@ export async function getRecommendations(request, env) {
 
   const tourAreaCode = url.searchParams.get("tourAreaCode") || defaultRegion.tourAreaCode;
   const areaCd = url.searchParams.get("areaCd") || defaultRegion.concentrationAreaCode;
-  const signguCd = url.searchParams.get("signguCd") || defaultRegion.concentrationSignguCode;
+  const requestedSignguCd = url.searchParams.get("signguCd");
+  const signguList = requestedSignguCd ? [requestedSignguCd] : (defaultRegion.sigunguCodes || [defaultRegion.concentrationSignguCode]);
   const baseYm = url.searchParams.get("baseYm") || previousYearMonth(url.searchParams.get("date"));
 
   const tourismRequests = STARGAZING_KEYWORDS.map((keyword) => client.call("korTour", "searchKeyword", {
@@ -62,20 +63,20 @@ export async function getRecommendations(request, env) {
     numOfRows: 100,
     arrange: "O",
   }));
-  const concentrationRequests = [client.call("concentration", "list", {
+  const concentrationRequests = signguList.map((signgu) => client.call("concentration", "list", {
     areaCd,
-    signguCd,
+    signguCd: signgu,
     numOfRows: 100,
-  })];
+  }));
   const campingRequests = [client.call("camping", "basedList", {
     numOfRows: 500,
   })];
-  const relatedRequests = [client.call("relatedTourism", "areaBasedList", {
+  const relatedRequests = signguList.map((signgu) => client.call("relatedTourism", "areaBasedList", {
     baseYm,
     areaCd,
-    signguCd,
+    signguCd: signgu,
     numOfRows: 100,
-  })];
+  }));
 
   const [tourismResults, concentrationResults, campingResults, relatedResults] = await Promise.all([
     Promise.allSettled(tourismRequests),
@@ -116,7 +117,7 @@ export async function getRecommendations(request, env) {
       region: defaultRegion.label,
       tourAreaCode,
       areaCd,
-      signguCd,
+      signguCd: requestedSignguCd || defaultRegion.concentrationSignguCode,
       baseYm,
     },
     destinations,

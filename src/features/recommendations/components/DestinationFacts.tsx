@@ -2,12 +2,12 @@ import { Car, SealCheck, Tent, TrendDown } from "@phosphor-icons/react";
 import { Metric } from "../../../components/ui/Metric";
 import type { RankedDestination } from "../../../lib/recommendationEngine";
 
-const show = (value: number | string | null, suffix = "") =>
-  value === null || value === "" ? "확인 중" : `${value}${suffix}`;
+const show = (value: number | string | null, suffix = "", fallback = "한적 (비과밀)") =>
+  value === null || value === "" ? fallback : `${value}${suffix}`;
 
 export function DestinationFacts({ destination }: { destination: RankedDestination }) {
   const facts = [
-    { icon: TrendDown, label: "한적도 지수", value: show(destination.calm, "점") },
+    { icon: TrendDown, label: "한적도 지수", value: show(destination.calm, "점", "한적 (비과밀)") },
     {
       icon: Car,
       label: "출발지 거리",

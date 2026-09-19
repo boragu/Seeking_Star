@@ -131,43 +131,87 @@ const comparableName = (value) => String(value ?? "")
   .replace(/\s+/g, "")
   .replace(/[()\[\]{}·・,.\-_/]/g, "");
 
+const extractRootKeyword = (name) => {
+  return comparableName(name)
+    .replace(/(천문대|관측소|전망대|캠핑장|야영장|자연휴양림|국립공원|도립공원|군립공원|마을|공원|랜드)/g, "");
+};
+
 function matchingConcentration(destination, concentrationItems) {
   const destinationName = comparableName(destination.name);
-  const matches = concentrationItems.filter((item) => {
+  let matches = concentrationItems.filter((item) => {
     const concentrationName = comparableName(item.name);
     return destinationName.includes(concentrationName) || concentrationName.includes(destinationName);
   });
+
+  if (matches.length === 0) {
+    const root = extractRootKeyword(destination.name);
+    if (root.length >= 2) {
+      matches = concentrationItems.filter((item) => {
+        const itemRoot = extractRootKeyword(item.name);
+        return (itemRoot.length >= 2 && (root.includes(itemRoot) || itemRoot.includes(root))) ||
+          comparableName(item.name).includes(root);
+      });
+    }
+  }
+
+  if (matches.length === 0 && destination.address) {
+    const addr = comparableName(destination.address);
+    matches = concentrationItems.filter((item) => {
+      const concentrationName = comparableName(item.name);
+      return concentrationName.length >= 3 && addr.includes(concentrationName);
+    });
+  }
+
   const dated = matches.filter((item) => item.concentrationRate !== null);
   return dated.at(-1) ?? matches.at(-1) ?? null;
 }
 
 export function buildLiveDestinations({ tourismItems, concentrationItems, campingItems, relatedItems, origin }) {
-  const seen = new Set();
-  return tourismItems
+  const seenTourism = new Set();
+  const uniqueTourism = tourismItems
     .map(normalizeTourismItem)
     .filter(Boolean)
     .filter((item) => {
-      if (seen.has(item.id)) return false;
-      seen.add(item.id);
+      if (seenTourism.has(item.id)) return false;
+      seenTourism.add(item.id);
       return true;
-    })
-    .map((destination) => {
-      const concentration = matchingConcentration(destination, concentrationItems.map(normalizeConcentrationItem).filter(Boolean));
-      const directDistanceKm = distanceKm(origin, destination);
-      const nearbyCampgrounds = campingItems
-        .map(normalizeCampingItem)
-        .filter(Boolean)
-        .map((campground) => ({ ...campground, distanceKm: distanceKm(destination, campground) }))
-        .filter((campground) => campground.distanceKm !== null && campground.distanceKm <= 20)
-        .sort((a, b) => a.distanceKm - b.distanceKm)
-        .slice(0, 5);
-      const nearbyRelated = relatedItems
-        .map(normalizeRelatedItem)
-        .filter(Boolean)
-        .map((related) => ({ ...related, distanceKm: distanceKm(destination, related) }))
-        .filter((related) => related.distanceKm === null || related.distanceKm <= 40)
-        .sort((a, b) => (a.distanceKm ?? Number.MAX_SAFE_INTEGER) - (b.distanceKm ?? Number.MAX_SAFE_INTEGER))
-        .slice(0, 5);
+    });
+
+  const seenCamping = new Set();
+  const uniqueCamping = campingItems
+    .map(normalizeCampingItem)
+    .filter(Boolean)
+    .filter((item) => {
+      if (seenCamping.has(item.id)) return false;
+      seenCamping.add(item.id);
+      return true;
+    });
+
+  const seenRelated = new Set();
+  const uniqueRelated = relatedItems
+    .map(normalizeRelatedItem)
+    .filter(Boolean)
+    .filter((item) => {
+      if (seenRelated.has(item.id)) return false;
+      seenRelated.add(item.id);
+      return true;
+    });
+
+  const normalizedConcentration = concentrationItems.map(normalizeConcentrationItem).filter(Boolean);
+
+  return uniqueTourism.map((destination) => {
+    const concentration = matchingConcentration(destination, normalizedConcentration);
+    const directDistanceKm = distanceKm(origin, destination);
+    const nearbyCampgrounds = uniqueCamping
+      .map((campground) => ({ ...campground, distanceKm: distanceKm(destination, campground) }))
+      .filter((campground) => campground.distanceKm !== null && campground.distanceKm <= 20)
+      .sort((a, b) => a.distanceKm - b.distanceKm)
+      .slice(0, 5);
+    const nearbyRelated = uniqueRelated
+      .map((related) => ({ ...related, distanceKm: distanceKm(destination, related) }))
+      .filter((related) => related.distanceKm === null || related.distanceKm <= 40)
+      .sort((a, b) => (a.distanceKm ?? Number.MAX_SAFE_INTEGER) - (b.distanceKm ?? Number.MAX_SAFE_INTEGER))
+      .slice(0, 5);
 
       return {
         ...destination,
