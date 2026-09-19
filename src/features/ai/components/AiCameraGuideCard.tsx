@@ -7,6 +7,7 @@ import { requestAiAstrophotographyGuide } from "../aiStargazingService";
 import {
   getCachedAiPhotoGuide,
   setCachedAiPhotoGuide,
+  invalidateCachedAiPhotoGuide,
 } from "../aiBriefingCache";
 
 export function AiCameraGuideCard({
@@ -65,6 +66,7 @@ export function AiCameraGuideCard({
   }, [destination.id, planner.date, deviceType, refreshKey]);
 
   const handleRefresh = () => {
+    invalidateCachedAiPhotoGuide(destination, planner, deviceType);
     setGuideText(null);
     setHasError(false);
     setRefreshKey((k) => k + 1);

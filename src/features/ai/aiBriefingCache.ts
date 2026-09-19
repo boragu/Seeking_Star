@@ -99,6 +99,20 @@ export function setCachedAiPhotoGuide(
   }
 }
 
+export function invalidateCachedAiPhotoGuide(
+  destination: Destination,
+  planner: PlannerState,
+  deviceType: "smartphone" | "camera"
+): void {
+  try {
+    const date = planner.date || "nodate";
+    const key = `${PHOTO_CACHE_PREFIX}${destination.id}:${date}:${deviceType}`;
+    localStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+}
+
 // -------------------------------------------------------------
 // 2. AI 오버투어리즘 대체 스토리 캐시
 // -------------------------------------------------------------
