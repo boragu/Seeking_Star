@@ -1,20 +1,52 @@
 {
-  "name": "별보러간다",
+  "id": "/",
+  "name": "별보러간다 — 고요한 밤하늘 여행",
   "short_name": "별보러간다",
-  "description": "혼잡을 피해 더 안전하고 고요한 밤하늘로 안내하는 강원 관광 웹앱",
+  "description": "혼잡을 피해 더 안전하고 고요한 밤하늘로 안내하는 강원 야간관광 웹앱",
   "lang": "ko-KR",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui", "browser"],
   "background_color": "#07131f",
   "theme_color": "#07131f",
-  "orientation": "any",
+  "orientation": "portrait-primary",
+  "categories": ["travel", "navigation", "weather"],
   "icons": [
     {
       "src": "/assets/app-icon.png",
-      "sizes": "512x512",
+      "sizes": "192x192 512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/app-icon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "오늘 밤 장소 찾기",
+      "short_name": "장소 찾기",
+      "description": "한적한 별보기 명소 추천받기",
+      "url": "/planner",
+      "icons": [{ "src": "/assets/app-icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "별지도 보기",
+      "short_name": "별지도",
+      "description": "실시간 별지도와 경로 확인",
+      "url": "/map",
+      "icons": [{ "src": "/assets/app-icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "출발 전 알림",
+      "short_name": "혼잡 알림",
+      "description": "출발 전 혼잡도 변화 알림 설정",
+      "url": "/alerts",
+      "icons": [{ "src": "/assets/app-icon.png", "sizes": "192x192" }]
     }
   ]
 }

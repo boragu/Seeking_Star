@@ -12,10 +12,16 @@ createRoot(rootElement).render(
   </React.StrictMode>,
 );
 
-if ("serviceWorker" in navigator && import.meta.env.PROD) {
+if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {
-      // Private browsing may block registration; the core app remains usable.
-    });
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((reg) => {
+        // Registration successful
+        reg.update().catch(() => {});
+      })
+      .catch(() => {
+        // Private browsing or specific browser policy may block registration; core app remains usable.
+      });
   });
 }
