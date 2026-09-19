@@ -8,7 +8,6 @@ import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
 import { MapCanvas } from "../features/map/components/MapCanvas";
 import { RoutePanel } from "../features/map/components/RoutePanel";
-import { createMapEmbedUrl } from "../features/map/createMapEmbedUrl";
 
 export function MapPage({ navigate }: { navigate: Navigate }) {
   const { planner, destination, route, location } = useApp();
@@ -30,8 +29,6 @@ export function MapPage({ navigate }: { navigate: Navigate }) {
     );
   }
 
-  const embedUrl = createMapEmbedUrl(destination, planner);
-
   return (
     <AppPage path="/map" navigate={navigate} tone="night" className="max-md:h-[100dvh] max-md:overflow-hidden max-md:pb-0">
       <div className="flex min-h-14 items-center bg-[#071521ee] px-6 max-md:hidden">
@@ -51,13 +48,13 @@ export function MapPage({ navigate }: { navigate: Navigate }) {
           requestCurrentLocation={location.request}
           locationFeedback={location.feedback}
         />
-        <MapCanvas destination={destination} embedUrl={embedUrl} />
+        <MapCanvas destination={destination} planner={planner} route={route} />
       </main>
 
       {/* 모바일 화면 (전체 화면 지도 + 제스처 바텀시트) */}
       <div className="md:hidden relative h-[calc(100dvh-66px)] w-full overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <MapCanvas destination={destination} embedUrl={embedUrl} />
+          <MapCanvas destination={destination} planner={planner} route={route} />
         </div>
 
         <BottomSheet snapPoints={[0.26, 0.62, 0.9]}>

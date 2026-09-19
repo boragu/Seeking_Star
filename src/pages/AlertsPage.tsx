@@ -23,6 +23,8 @@ export function AlertsPage({ navigate }: { navigate: Navigate }) {
             setEnabled={preferences.setEnabled}
             timing={preferences.timing}
             setTiming={preferences.setTiming}
+            permission={preferences.permission}
+            requestPermission={preferences.requestPermission}
           />
           <AlertPreview
             destination={destination}

@@ -23,31 +23,47 @@ export function useAlertPreferences(destination?: Destination | null) {
   const [testSent, setTestSent] = useState(false);
   const [permission, setPermission] = useState<NotificationPermissionState>(() => getNotificationPermission());
 
+  const requestPermission = useCallback(async () => {
+    const nextPermission = await requestNotificationPermission();
+    setPermission(nextPermission);
+    return nextPermission;
+  }, []);
+
   const setEnabled = useCallback(
     async (value: boolean, targetDest?: Destination | null) => {
-      setEnabledState(value);
-      localStorage.setItem(ENABLED_KEY, String(value));
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-
       const dest = targetDest !== undefined ? targetDest : destination;
 
       if (value) {
-        let nextPermission = getNotificationPermission();
-        if (nextPermission === "default") {
-          nextPermission = await requestNotificationPermission();
+        let currentPerm = getNotificationPermission();
+        if (currentPerm === "default") {
+          currentPerm = await requestNotificationPermission();
         }
-        setPermission(nextPermission);
+        setPermission(currentPerm);
 
-        if (nextPermission === "granted") {
-          const timingLabel = timing === "60" ? "1시간" : `${timing}분`;
-          const destName = dest ? dest.name : "선택한 별보기 장소";
-          await sendStargazingNotification(`🌟 [별보러간다] ${destName} 알림 등록 완료`, {
-            body: `출발 ${timingLabel} 전에 혼잡도 변화 및 별보기 예보를 보내드릴게요.`,
-            tag: "alert-registration",
-            url: "/alerts"
-          });
+        if (currentPerm !== "granted") {
+          // 권한이 허용되지 않은 경우 켜지지 않음
+          return false;
         }
+
+        setEnabledState(true);
+        localStorage.setItem(ENABLED_KEY, "true");
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+
+        const timingLabel = timing === "60" ? "1시간" : `${timing}분`;
+        const destName = dest ? dest.name : "선택한 별보기 장소";
+        await sendStargazingNotification(`🌟 [별보러간다] ${destName} 알림 등록 완료`, {
+          body: `출발 ${timingLabel} 전에 혼잡도 변화 및 별보기 예보를 보내드릴게요.`,
+          tag: "alert-registration",
+          url: "/alerts"
+        });
+        return true;
+      } else {
+        setEnabledState(false);
+        localStorage.setItem(ENABLED_KEY, "false");
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+        return true;
       }
     },
     [destination, timing]
@@ -117,6 +133,7 @@ export function useAlertPreferences(destination?: Destination | null) {
     saved,
     testSent,
     permission,
+    requestPermission,
     save,
     triggerTestAlert
   };
