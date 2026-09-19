@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowClockwise, CheckCircle, Clock, Sparkle, UserCheck } from "@phosphor-icons/react";
+import { ArrowClockwise, CheckCircle, Clock, Sparkle, UserCheck, WarningCircle } from "@phosphor-icons/react";
 import { AiBadge } from "../../../components/ui/AiBadge";
 import type { Destination, PlannerState } from "../../../domain/types";
 import { generateAiJourneyBriefing, requestAiEnhancedGuide } from "../aiStargazingService";
@@ -12,29 +12,37 @@ export function AiJourneyBriefing({
   planner: PlannerState;
 }) {
   const [llmText, setLlmText] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasError, setHasError] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState<number>(0);
 
-  // 로컬 룰 기반 브리핑 (즉시 렌더링 및 Fallback)
+  // 로컬 보조 가이드 (타이밍 및 핵심 포인트)
   const localBriefing = generateAiJourneyBriefing(destination, planner);
 
   useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
 
+    // 새 요청 시 이전 텍스트를 비우고 로딩 상태를 명확히 표시
     setIsLoading(true);
+    setHasError(false);
+    setLlmText(null);
+
     requestAiEnhancedGuide(destination, planner, controller.signal)
       .then((content) => {
-        if (isMounted) {
+        if (!isMounted) return;
+        if (content) {
           setLlmText(content);
-          setIsLoading(false);
+          setHasError(false);
+        } else {
+          setHasError(true);
         }
+        setIsLoading(false);
       })
       .catch(() => {
-        if (isMounted) {
-          setLlmText(null);
-          setIsLoading(false);
-        }
+        if (!isMounted) return;
+        setHasError(true);
+        setIsLoading(false);
       });
 
     return () => {
@@ -42,6 +50,12 @@ export function AiJourneyBriefing({
       controller.abort();
     };
   }, [destination.id, planner.departure, planner.date, planner.people, planner.transport, planner.accessibility, refreshKey]);
+
+  const handleRefresh = () => {
+    setLlmText(null);
+    setHasError(false);
+    setRefreshKey((k) => k + 1);
+  };
 
   return (
     <div className="mt-4 border border-line bg-paper/60 p-4">
@@ -53,25 +67,25 @@ export function AiJourneyBriefing({
               맞춤 여정 브리핑
             </h3>
           </div>
-          {llmText ? (
-            <AiBadge label="AI 브리핑" variant="gold" />
-          ) : isLoading ? (
-            <AiBadge label="AI 생성 중..." variant="teal" />
+          {isLoading ? (
+            <AiBadge label="vLLM AI 실시간 생성 중..." variant="teal" />
+          ) : llmText ? (
+            <AiBadge label="vLLM AI 생성 완료" variant="gold" />
           ) : (
-            <AiBadge label="AI 브리핑" variant="teal" />
+            <AiBadge label="AI 통신 확인" variant="subtle" />
           )}
         </div>
 
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setRefreshKey((k) => k + 1)}
+            onClick={handleRefresh}
             disabled={isLoading}
-            className="inline-flex items-center gap-1 text-[11px] text-stone-500 hover:text-teal disabled:opacity-50 transition cursor-pointer"
-            title="AI 브리핑 다시 생성"
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-stone-600 hover:text-teal disabled:opacity-50 transition cursor-pointer"
+            title="vLLM AI 브리핑 다시 생성"
           >
             <ArrowClockwise size={13} className={isLoading ? "animate-spin text-teal" : ""} />
-            <span>{isLoading ? "생성 중" : "다시 생성"}</span>
+            <span>{isLoading ? "AI 생성 중..." : "AI 다시 생성"}</span>
           </button>
           <span className="shrink-0 text-[11px] text-stone-500">
             {planner.departure} 출발 · {planner.date || "선택일자"}
@@ -79,22 +93,42 @@ export function AiJourneyBriefing({
         </div>
       </div>
 
-      {/* 브리핑 본문: vLLM 응답 또는 로컬 템플릿 */}
-      <div className="mt-2.5 min-h-[36px]">
-        {isLoading && !llmText ? (
-          <div className="space-y-1.5 py-1 animate-pulse">
-            <div className="h-3 w-4/5 rounded bg-line/60" />
-            <div className="h-3 w-full rounded bg-line/40" />
-            <div className="h-3 w-2/3 rounded bg-line/40" />
+      {/* 브리핑 본문: vLLM AI 실시간 생성 내용 */}
+      <div className="mt-3 min-h-[50px]">
+        {isLoading ? (
+          <div className="space-y-2 py-1">
+            <div className="flex items-center gap-2 text-[11px] font-medium text-teal animate-pulse">
+              <Sparkle size={14} className="animate-spin" />
+              <span>vLLM AI 모델이 여행 조건과 천문 빅데이터를 분석하여 브리핑을 작성하고 있습니다...</span>
+            </div>
+            <div className="space-y-1.5 animate-pulse">
+              <div className="h-3 w-4/5 rounded bg-line/60" />
+              <div className="h-3 w-full rounded bg-line/40" />
+              <div className="h-3 w-2/3 rounded bg-line/40" />
+            </div>
+          </div>
+        ) : hasError ? (
+          <div className="flex items-center justify-between rounded border border-line/60 bg-white/50 p-2.5 text-[11px] text-stone-600">
+            <div className="flex items-center gap-2">
+              <WarningCircle size={16} className="text-rust shrink-0" />
+              <span>AI 서버 응답이 지연되었습니다.</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              className="font-bold text-teal hover:underline cursor-pointer"
+            >
+              다시 시도
+            </button>
           </div>
         ) : (
-          <p className="text-[11px] leading-relaxed text-stone-700">
-            {llmText || localBriefing.personaSummary}
+          <p className="text-[12px] leading-relaxed font-medium text-stone-800 dark:text-stone-200">
+            {llmText}
           </p>
         )}
       </div>
 
-      {/* 권장 출발 타이밍 가이드 (프로젝트 테마 bg-white/60 + text-ink) */}
+      {/* 권장 출발 타이밍 가이드 */}
       <div className="mt-3 flex items-start gap-2.5 rounded border border-line/60 bg-white/60 p-2.5 text-[11px] leading-relaxed text-stone-700">
         <Clock size={16} weight="fill" className="mt-0.5 shrink-0 text-rust" />
         <div>
