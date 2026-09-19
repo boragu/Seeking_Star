@@ -3,7 +3,6 @@ import { ArrowLeft, ArrowRight, BellRinging, BookmarkSimple, FolderStar, ListChe
 import type { Navigate } from "../app/navigation";
 import { useApp } from "../app/AppContext";
 import { AppPage } from "../components/layout/AppPage";
-import { JourneyStepper } from "../components/layout/JourneyStepper";
 import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
 import { PageHeading } from "../components/ui/PageHeading";
@@ -85,12 +84,10 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
     <AppPage path="/trips" navigate={navigate}>
       <main
         id="main-content"
-        className="mx-auto w-[min(1160px,calc(100%-64px))] py-8 max-md:w-[calc(100%-32px)] max-md:pt-6 max-md:pb-24"
+        className="mx-auto w-[min(1160px,calc(100%-64px))] pt-8 pb-36 max-md:w-[calc(100%-32px)] max-md:pt-6 max-md:pb-60"
       >
-        <JourneyStepper current={3} />
-
         {/* 상단 탭 전환: 현재 여정 상세 vs 여정 보관함 */}
-        <div className="mt-8 flex items-center justify-between border-b border-line pb-4 max-sm:flex-col max-sm:items-start max-sm:gap-4">
+        <div className="flex items-center justify-between border-b border-line pb-4 max-sm:flex-col max-sm:items-start max-sm:gap-4">
           <div className="flex items-center gap-2">
             <button
               className={`flex items-center gap-2 rounded-lg px-4 py-2.5 text-[14px] font-bold transition ${
