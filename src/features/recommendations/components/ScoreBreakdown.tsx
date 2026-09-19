@@ -47,16 +47,16 @@ export function ScoreBreakdown({ destination }: { destination: RankedDestination
           return (
             <div key={key}>
               <div className="mb-1.5 flex justify-between gap-2 text-[11px]">
-                <span className={hasValue ? "font-bold text-stone-900 dark:text-stone-100" : "text-stone-400 dark:text-stone-600"}>
+                <span className={hasValue ? "font-bold text-ink" : "text-stone-400"}>
                   {label}
                 </span>
                 {hasValue ? (
-                  <strong className="font-extrabold text-teal dark:text-teal-300">{value}</strong>
+                  <strong className="font-bold text-ink">{value}</strong>
                 ) : (
-                  <span className="text-stone-400 dark:text-stone-600 font-medium" title="공공데이터 미제공 또는 결측">-</span>
+                  <span className="text-stone-400 font-medium" title="공공데이터 미제공 또는 결측">-</span>
                 )}
               </div>
-              <div className="h-1 overflow-hidden bg-stone-200 dark:bg-stone-800 rounded-full">
+              <div className="h-1 overflow-hidden bg-stone-200 rounded-full">
                 <i
                   className={`block h-full transition-all duration-300 ${hasValue ? "bg-teal" : "bg-transparent"}`}
                   style={{ width: hasValue ? `${value}%` : "0%" }}

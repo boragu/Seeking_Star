@@ -44,7 +44,7 @@ export function AiJourneyBriefing({
   }, [destination.id, planner.departure, planner.date, planner.people, planner.transport, planner.accessibility, refreshKey]);
 
   return (
-    <div className="mt-4 border border-line bg-gradient-to-br from-paper via-paper/80 to-teal/5 p-4 shadow-[0_8px_30px_rgba(68,49,29,.04)]">
+    <div className="mt-4 border border-line bg-paper/60 p-4">
       <div className="flex items-center justify-between border-b border-line/60 pb-2.5 max-sm:flex-wrap max-sm:gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1.5">
@@ -67,50 +67,50 @@ export function AiJourneyBriefing({
             type="button"
             onClick={() => setRefreshKey((k) => k + 1)}
             disabled={isLoading}
-            className="inline-flex items-center gap-1 text-[10px] font-medium text-stone-600 hover:text-teal disabled:opacity-50 transition cursor-pointer"
+            className="inline-flex items-center gap-1 text-[11px] text-stone-500 hover:text-teal disabled:opacity-50 transition cursor-pointer"
             title="AI 브리핑 다시 생성"
           >
-            <ArrowClockwise size={12} className={isLoading ? "animate-spin text-teal" : ""} />
+            <ArrowClockwise size={13} className={isLoading ? "animate-spin text-teal" : ""} />
             <span>{isLoading ? "생성 중" : "다시 생성"}</span>
           </button>
-          <span className="shrink-0 text-[10px] text-stone-500">
-            {planner.departure} 출발 · {planner.date || "선택일자"} 기준
+          <span className="shrink-0 text-[11px] text-stone-500">
+            {planner.departure} 출발 · {planner.date || "선택일자"}
           </span>
         </div>
       </div>
 
       {/* 브리핑 본문: vLLM 응답 또는 로컬 템플릿 */}
-      <div className="mt-3 min-h-[40px]">
+      <div className="mt-2.5 min-h-[36px]">
         {isLoading && !llmText ? (
           <div className="space-y-1.5 py-1 animate-pulse">
-            <div className="h-3 w-4/5 rounded bg-teal/20" />
-            <div className="h-3 w-full rounded bg-stone-200" />
-            <div className="h-3 w-2/3 rounded bg-stone-200" />
+            <div className="h-3 w-4/5 rounded bg-line/60" />
+            <div className="h-3 w-full rounded bg-line/40" />
+            <div className="h-3 w-2/3 rounded bg-line/40" />
           </div>
         ) : (
-          <p className="text-[12px] leading-relaxed font-medium text-stone-800 dark:text-stone-200">
+          <p className="text-[11px] leading-relaxed text-stone-700">
             {llmText || localBriefing.personaSummary}
           </p>
         )}
       </div>
 
-      {/* 출발 타이밍 조언 뱃지 (가독성 높은 대비 스타일) */}
-      <div className="mt-3.5 flex items-start gap-2.5 rounded-md border border-teal/40 bg-teal/10 dark:bg-teal/900/30 p-3 text-[11px]">
-        <Clock size={16} weight="fill" className="mt-0.5 shrink-0 text-teal-800 dark:text-teal-300" />
-        <div className="leading-relaxed">
-          <strong className="font-extrabold text-teal-900 dark:text-teal-200">권장 출발 타이밍:</strong>
-          <span className="ml-1.5 font-medium text-stone-900 dark:text-stone-100">{localBriefing.departureTimingAdvice}</span>
+      {/* 권장 출발 타이밍 가이드 (프로젝트 테마 bg-white/60 + text-ink) */}
+      <div className="mt-3 flex items-start gap-2.5 rounded border border-line/60 bg-white/60 p-2.5 text-[11px] leading-relaxed text-stone-700">
+        <Clock size={16} weight="fill" className="mt-0.5 shrink-0 text-rust" />
+        <div>
+          <strong className="font-bold text-ink">권장 출발 타이밍:</strong>
+          <span className="ml-1 text-stone-600">{localBriefing.departureTimingAdvice}</span>
         </div>
       </div>
 
       {/* 맞춤 분석 포인트 리스트 */}
-      <div className="mt-3 space-y-1.5">
+      <div className="mt-2 space-y-1.5">
         {localBriefing.goldenKeyPoints.map((point, idx) => (
           <div
             key={idx}
-            className="flex items-start gap-2 rounded bg-white/70 dark:bg-stone-800/60 p-2.5 text-[11px] leading-relaxed text-stone-800 dark:text-stone-200 border border-line/40"
+            className="flex items-start gap-2.5 rounded border border-line/50 bg-white/50 p-2.5 text-[11px] leading-relaxed text-stone-700"
           >
-            <CheckCircle size={15} weight="fill" className="mt-0.5 shrink-0 text-teal" />
+            <CheckCircle size={16} weight="fill" className="mt-0.5 shrink-0 text-teal" />
             <span>{point}</span>
           </div>
         ))}
@@ -118,8 +118,8 @@ export function AiJourneyBriefing({
 
       {/* 배려 여행 / 무장애 옵션 알림 */}
       {planner.accessibility && (
-        <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-medium text-teal">
-          <UserCheck size={14} className="shrink-0" />
+        <div className="mt-3 flex items-center gap-1.5 text-[10px] text-stone-500">
+          <UserCheck size={13} className="text-teal shrink-0" />
           <span>보행 약자 및 무장애 편의 시설 접근성 선호가 적용된 브리핑입니다.</span>
         </div>
       )}
