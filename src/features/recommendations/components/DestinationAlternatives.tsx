@@ -2,8 +2,8 @@ import { Check, MapPin } from "@phosphor-icons/react";
 import { cn } from "../../../lib/cn";
 import type { RankedDestination } from "../../../lib/recommendationEngine";
 
-import { BottomSheet } from "../../../components/ui/BottomSheet";
 import { useState } from "react";
+import { Drawer } from "vaul";
 
 export function DestinationAlternatives({
   items,
@@ -134,29 +134,41 @@ export function DestinationAlternatives({
       {hiddenCount > 0 && (
         <button
           onClick={() => setIsSheetOpen(true)}
-          className="mt-3 w-full rounded border border-line bg-white/50 py-2.5 text-[12px] text-stone-600 transition hover:bg-white/80"
+          className="mt-3 w-full rounded border border-line bg-white/50 py-2.5 text-[12px] font-medium text-stone-700 transition hover:bg-white/80 active:scale-[0.99]"
           type="button"
         >
           추천 순위 외 {hiddenCount}개 관측지 더보기
         </button>
       )}
 
-      {isSheetOpen && (
-        <BottomSheet snapPoints={[0.8]} defaultSnap={0} onSnapChange={() => {}}>
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-display text-[18px] font-bold text-white">모든 추천 후보지</h3>
-            <button
-              onClick={() => setIsSheetOpen(false)}
-              className="text-[12px] text-cream/70 hover:text-white underline"
-            >
-              닫기
-            </button>
-          </div>
-          <div className="grid grid-cols-1 gap-2.5">
-            {items.map((item, index) => renderItem(item, index, true))}
-          </div>
-        </BottomSheet>
-      )}
+      <Drawer.Root open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <Drawer.Portal>
+          <Drawer.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs transition-opacity duration-300" />
+          <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] flex-col rounded-t-[24px] border-t border-cream/20 bg-[#091927] text-cream shadow-2xl focus:outline-none">
+            <div className="flex items-center justify-center py-3">
+              <Drawer.Handle className="h-1.5 w-12 rounded-full bg-cream/35" />
+            </div>
+            <div className="flex-1 overflow-y-auto px-5 pb-8">
+              <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
+                <Drawer.Title className="font-display text-[18px] font-bold text-white">
+                  전체 추천 후보지 ({items.length}개소)
+                </Drawer.Title>
+                <Drawer.Close asChild>
+                  <button
+                    className="text-[12px] text-cream/70 hover:text-white underline underline-offset-2"
+                    type="button"
+                  >
+                    닫기
+                  </button>
+                </Drawer.Close>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5">
+                {items.map((item, index) => renderItem(item, index, true))}
+              </div>
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
     </section>
   );
 }
