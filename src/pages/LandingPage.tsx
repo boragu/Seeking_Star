@@ -1,15 +1,16 @@
 import { ArrowRight, CalendarBlank, Crosshair, MapPin } from "@phosphor-icons/react";
 import type { Navigate } from "../app/navigation";
+import { useApp } from "../app/AppContext";
 import { AppHeader } from "../components/layout/AppHeader";
 import { PwaInstallBanner } from "../components/layout/PwaInstallBanner";
 import { Button } from "../components/ui/Button";
-import type { PlannerState } from "../domain/types";
 import { HeroGuide } from "../features/landing/HeroGuide";
 import { formatShortKoreanDate } from "../lib/currentContext";
 
-export function LandingPage({ navigate, planner }: { navigate: Navigate; planner: PlannerState }) {
+export function LandingPage({ navigate }: { navigate: Navigate }) {
+  const { planner } = useApp();
   return (
-    <div className="min-h-screen bg-ink text-cream max-md:-mb-[66px]">
+    <div className="min-h-screen bg-ink text-cream">
       <AppHeader path="/" navigate={navigate} />
       <main id="main-content" className="hero-art relative min-h-[calc(100vh-132px)] overflow-hidden max-md:min-h-[calc(100dvh-62px)]">
         <div className="star-haze pointer-events-none absolute inset-0" />

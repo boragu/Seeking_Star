@@ -1,36 +1,30 @@
 import { ArrowRight, BookmarkSimple, MapPin, ShareNetwork } from "@phosphor-icons/react";
 import type { Navigate } from "../app/navigation";
+import { useApp } from "../app/AppContext";
 import { AppPage } from "../components/layout/AppPage";
 import { JourneyStepper } from "../components/layout/JourneyStepper";
 import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
 import { PageHeading } from "../components/ui/PageHeading";
-import type { Destination, PlannerState, RouteEstimate } from "../domain/types";
 import { JourneyFacts } from "../features/journey/components/JourneyFacts";
 import { JourneyTimeline } from "../features/journey/components/JourneyTimeline";
 import { NearbyPlaceList } from "../features/journey/components/NearbyPlaceList";
 import { useShareJourney } from "../features/journey/useShareJourney";
 import { addMinutesToTime, formatDateInputKorean } from "../lib/currentContext";
 
-export function TripsPage({
-  navigate,
-  planner,
-  destination,
-  route,
-  saved,
-  setSaved,
-}: {
-  navigate: Navigate;
-  planner: PlannerState;
-  destination: Destination | null;
-  route: RouteEstimate | null;
-  saved: boolean;
-  setSaved: (value: boolean) => void;
-}) {
+export function TripsPage({ navigate }: { navigate: Navigate }) {
+  const {
+    planner,
+    destination,
+    route,
+    journey: { saved, setSaved }
+  } = useApp();
+
   const sharing = useShareJourney(
     "별보러간다 여정",
     destination ? `${destination.name} 관측 여정` : "관측 여정"
   );
+  
   if (!destination) {
     return (
       <AppPage path="/trips" navigate={navigate}>

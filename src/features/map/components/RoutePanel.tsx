@@ -18,9 +18,12 @@ export function RoutePanel({
 }) {
   const arrival = route ? addMinutesToTime(planner.time, route.durationMinutes) : null;
   return (
-    <aside className="overflow-y-auto border-r border-cream/12 bg-[#091927] px-7 py-6 max-md:overflow-visible max-md:border-r-0 max-md:px-5">
+    <aside className="overflow-y-auto border-r border-cream/12 bg-[#091927] px-7 py-6 max-md:absolute max-md:inset-x-0 max-md:bottom-0 max-md:z-10 max-md:max-h-[55vh] max-md:rounded-t-2xl max-md:border-t max-md:border-cream/15 max-md:px-5 max-md:shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+      <div className="hidden max-md:mb-3 max-md:flex max-md:justify-center">
+        <div className="h-1.5 w-10 rounded-full bg-cream/20" />
+      </div>
       <button
-        className="mb-6 flex min-h-8 items-center gap-2 text-[12px] text-cream/60 transition hover:text-cream"
+        className="mb-6 flex min-h-8 items-center gap-2 text-[12px] text-cream/60 transition hover:text-cream max-md:mb-4"
         onClick={() => navigate("/planner")}
         type="button"
       >

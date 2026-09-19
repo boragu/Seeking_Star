@@ -9,10 +9,10 @@ export function MapCanvas({
   embedUrl: string | null;
 }) {
   return (
-    <section className="relative min-h-[440px] overflow-hidden bg-[#d8d2c4]">
+    <section className="relative min-h-[440px] overflow-hidden bg-[#d8d2c4] max-md:absolute max-md:inset-0 max-md:z-0">
       {embedUrl ? (
         <iframe
-          className="size-full min-h-[440px] border-0 grayscale-[.1] contrast-[.96]"
+          className="size-full min-h-[440px] border-0 grayscale-[.1] contrast-[.96] max-md:h-full"
           src={embedUrl}
           title={`${destination.name} 지도 위치`}
           loading="eager"

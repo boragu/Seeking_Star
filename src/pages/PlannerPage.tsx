@@ -1,45 +1,29 @@
 import type { ApiRequestError, RecommendationResponse } from "../api/contracts";
 import type { Navigate } from "../app/navigation";
+import { useApp } from "../app/AppContext";
 import { AppPage } from "../components/layout/AppPage";
 import { JourneyStepper } from "../components/layout/JourneyStepper";
 import { PageHeading } from "../components/ui/PageHeading";
-import type { PlannerState } from "../domain/types";
-import type { LocationFeedback } from "../features/location/useDeviceLocation";
 import { DestinationSpotlight } from "../features/planner/components/DestinationSpotlight";
 import { PlannerForm } from "../features/planner/components/PlannerForm";
 import { RecommendationState } from "../features/recommendations/components/RecommendationState";
 import { SourceNote } from "../features/recommendations/components/SourceNote";
-import type { RankedDestination } from "../lib/recommendationEngine";
 
 interface PlannerPageProps {
   navigate: Navigate;
-  planner: PlannerState;
-  setPlanner: React.Dispatch<React.SetStateAction<PlannerState>>;
-  ranked: RankedDestination[];
-  selected: RankedDestination | null;
-  setSelectedId: (id: string) => void;
-  status: "idle" | "loading" | "success" | "error";
-  error: ApiRequestError | null;
-  data: RecommendationResponse | null;
-  reload: () => Promise<RecommendationResponse | null>;
-  locationFeedback: LocationFeedback;
-  requestCurrentLocation: () => void;
 }
 
-export function PlannerPage({
-  navigate,
-  planner,
-  setPlanner,
-  ranked,
-  selected,
-  setSelectedId,
-  status,
-  error,
-  data,
-  reload,
-  locationFeedback,
-  requestCurrentLocation,
-}: PlannerPageProps) {
+export function PlannerPage({ navigate }: PlannerPageProps) {
+  const {
+    planner,
+    setPlanner,
+    ranked,
+    destination: selected,
+    journey: { setSelectedId },
+    recommendations: { status, error, data, reload },
+    location: { feedback: locationFeedback, request: requestCurrentLocation }
+  } = useApp();
+
   const recommendationView =
     status === "loading" || status === "idle" ? (
       <RecommendationState status="loading" onRetry={() => void reload()} />

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { createDefaultPlanner } from "../domain/planner";
 import { createRouteEstimate } from "../domain/routeEstimate";
 import type { PlannerState } from "../domain/types";
@@ -6,9 +6,13 @@ import { useJourneySelection } from "../features/journey/useJourneySelection";
 import { useDeviceLocation } from "../features/location/useDeviceLocation";
 import { useRecommendations } from "../features/recommendations/useRecommendations";
 import { rankDestinations } from "../lib/recommendationEngine";
-import type { AppPath } from "./navigation";
+import { useRoute } from "./navigation";
 
-export function useAppModel(path: AppPath) {
+export type AppContextType = ReturnType<typeof useAppModel>;
+
+const AppContext = createContext<AppContextType | null>(null);
+
+function useAppModel(path: string) {
   const [planner, setPlanner] = useState<PlannerState>(createDefaultPlanner);
   const journey = useJourneySelection();
   const { selectedId, setSelectedId } = journey;
@@ -23,4 +27,19 @@ export function useAppModel(path: AppPath) {
   }, [ranked, selectedId, setSelectedId]);
 
   return { planner, setPlanner, ranked, destination, route, recommendations, location, journey };
+}
+
+export function AppProvider({ children }: { children: ReactNode }) {
+  const [path] = useRoute();
+  const model = useAppModel(path);
+
+  return <AppContext.Provider value={model}>{children}</AppContext.Provider>;
+}
+
+export function useApp() {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error("useApp must be used within an AppProvider");
+  }
+  return context;
 }

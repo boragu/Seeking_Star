@@ -51,18 +51,9 @@ export function DestinationSpotlight({
         <ScoreBreakdown destination={destination} />
       </div>
       <DestinationAlternatives items={items} selectedId={destination.id} onSelect={onSelect} />
-      <div className="mt-5 grid grid-cols-[1.4fr_1fr] gap-2.5 max-sm:grid-cols-1">
-        <Button variant="primary" onClick={() => navigate("/map")}>
+      <div className="mt-5 max-sm:grid-cols-1">
+        <Button className="w-full" variant="primary" onClick={() => navigate("/map")}>
           지도 경로 확인 <ArrowRight />
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => {
-            onSelect(destination.id);
-            navigate("/trips");
-          }}
-        >
-          <BookmarkSimple /> 여정 상세 보기
         </Button>
       </div>
     </section>

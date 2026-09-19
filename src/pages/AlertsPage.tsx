@@ -1,12 +1,13 @@
 import type { Navigate } from "../app/navigation";
+import { useApp } from "../app/AppContext";
 import { AppPage } from "../components/layout/AppPage";
 import { PageHeading } from "../components/ui/PageHeading";
-import type { Destination } from "../domain/types";
 import { AlertPreview } from "../features/alerts/components/AlertPreview";
 import { AlertSettings } from "../features/alerts/components/AlertSettings";
 import { useAlertPreferences } from "../features/alerts/useAlertPreferences";
 
-export function AlertsPage({ navigate, destination }: { navigate: Navigate; destination: Destination | null }) {
+export function AlertsPage({ navigate }: { navigate: Navigate }) {
+  const { destination } = useApp();
   const preferences = useAlertPreferences();
   return (
     <AppPage path="/alerts" navigate={navigate}>
