@@ -5,7 +5,7 @@ import { Field, FieldFrame } from "../../../components/ui/Field";
 import { SectionHeading } from "../../../components/ui/SectionHeading";
 import type { PlannerState } from "../../../domain/types";
 import type { LocationFeedback } from "../../location/useDeviceLocation";
-import { findHubCoordinates, getCurrentDateTime } from "../../../lib/currentContext";
+import { findHubCoordinates } from "../../../lib/currentContext";
 import { cn } from "../../../lib/cn";
 
 export function PlannerForm({
@@ -38,7 +38,6 @@ export function PlannerForm({
       locationSource: "manual",
     }));
   };
-  const useCurrentTime = () => setPlanner((state) => ({ ...state, ...getCurrentDateTime() }));
   const locationProblem = ["denied", "error", "unsupported"].includes(locationFeedback.status);
 
   const handleSubmit = () => {
@@ -124,18 +123,7 @@ export function PlannerForm({
               />
             </FieldFrame>
           </Field>
-          <Field
-            label="출발 시간"
-            action={
-              <button
-                className="text-[11px] font-medium text-teal underline underline-offset-2"
-                onClick={useCurrentTime}
-                type="button"
-              >
-                현재 시각
-              </button>
-            }
-          >
+          <Field label="출발 시간">
             <FieldFrame icon={<Clock />}>
               <input
                 className="w-full bg-transparent text-[13px] outline-none"
