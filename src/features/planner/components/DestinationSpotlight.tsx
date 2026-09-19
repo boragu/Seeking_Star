@@ -1,6 +1,7 @@
 import { ArrowRight, MapPin } from "@phosphor-icons/react";
 import type { Navigate } from "../../../app/navigation";
 import { useApp } from "../../../app/AppContext";
+import { AiBadge } from "../../../components/ui/AiBadge";
 import { Button } from "../../../components/ui/Button";
 import { SectionHeading } from "../../../components/ui/SectionHeading";
 import type { RankedDestination } from "../../../lib/recommendationEngine";
@@ -22,13 +23,15 @@ export function DestinationSpotlight({
   onSelect: (id: string) => void;
 }) {
   const { planner } = useApp();
+  const rankIndex = items.findIndex((item) => item.id === destination.id);
+  const rankLabel = rankIndex >= 0 ? `AI ${rankIndex + 1}순위 추천` : "AI 추천 관측지";
 
   return (
     <section className="border border-line bg-white/52 p-6 shadow-[0_20px_60px_rgba(68,49,29,.07)] max-md:p-4">
       <SectionHeading
         number="02"
-        title="추천 1순위 관측지"
-        description="혼잡도, 이동 거리, 기상 여건 종합 분석 결과"
+        title={rankLabel}
+        description={`${destination.name}의 혼잡 분산도, 이동 거리, 인근 체류 인프라 종합 분석 결과`}
         tone="rust"
       />
       <div className="relative h-[290px] overflow-hidden bg-ink max-lg:h-[250px] max-sm:h-[210px]">
@@ -36,6 +39,9 @@ export function DestinationSpotlight({
         <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/10 to-transparent" />
         <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-5 text-cream">
           <div className="min-w-0">
+            <div className="mb-1 flex items-center gap-2">
+              <AiBadge label="AI 추천" variant="dark" />
+            </div>
             <h2 className="truncate font-display text-[clamp(26px,3vw,38px)] font-bold">{destination.name}</h2>
             <p className="mt-1 flex items-center gap-1 truncate text-[11px] text-cream/70">
               <MapPin />

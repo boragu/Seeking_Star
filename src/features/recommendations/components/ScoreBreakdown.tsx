@@ -1,4 +1,5 @@
 import { Info } from "@phosphor-icons/react";
+import { AiBadge } from "../../../components/ui/AiBadge";
 import type { RankedDestination, ScoreKey } from "../../../lib/recommendationEngine";
 
 const scoreLabels: Record<ScoreKey, string> = {
@@ -22,9 +23,12 @@ export function ScoreBreakdown({ destination }: { destination: RankedDestination
   }
   return (
     <section className="border-y border-line py-4" aria-label="점수 산출 상세">
-      <div className="mb-4 flex items-end justify-between">
-        <span className="text-[12px] font-bold text-teal">항목별 지표 분석</span>
-        <span className="text-[11px] text-stone-500">공공데이터 기준</span>
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-[12px] font-bold text-teal">항목별 지표 분석</span>
+          <AiBadge label="AI 분석" variant="teal" />
+        </div>
+        <span className="text-[11px] text-stone-500">공공데이터 기준 가중치 산출</span>
       </div>
       <div className="grid grid-cols-5 gap-4 max-lg:grid-cols-3 max-sm:grid-cols-2">
         {entries.map(([key, value]) => (
@@ -42,3 +46,4 @@ export function ScoreBreakdown({ destination }: { destination: RankedDestination
     </section>
   );
 }
+

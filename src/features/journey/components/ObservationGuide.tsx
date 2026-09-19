@@ -1,4 +1,5 @@
-import { Camera, Compass, Eye, Moon, ShieldCheck } from "@phosphor-icons/react";
+import { Camera, Compass, Moon, ShieldCheck } from "@phosphor-icons/react";
+import { AiBadge } from "../../../components/ui/AiBadge";
 import type { Destination, PlannerState, RouteEstimate } from "../../../domain/types";
 import { generateObservationGuide } from "../../ai/aiStargazingService";
 
@@ -15,9 +16,12 @@ export function ObservationGuide({
 
   return (
     <section className="mt-6 border border-line bg-white/45 p-6 shadow-[0_16px_45px_rgba(68,49,29,.05)] max-sm:p-5">
-      <div className="flex items-center justify-between border-b border-line pb-3">
-        <h2 className="font-display text-[20px] font-bold">현장 관측 및 촬영 가이드</h2>
-        <span className="text-[11px] text-stone-500">천문력·위치 좌표 기반 안내</span>
+      <div className="flex items-center justify-between border-b border-line pb-3 max-sm:flex-wrap max-sm:gap-2">
+        <div className="flex items-center gap-2">
+          <h2 className="font-display text-[20px] font-bold">현장 관측 및 촬영 가이드</h2>
+          <AiBadge label="AI 가이드" variant="teal" />
+        </div>
+        <span className="text-[11px] text-stone-500">천문력·위치 좌표 기반 생성</span>
       </div>
 
       <p className="mt-3 text-[12px] leading-relaxed text-stone-600">
@@ -44,8 +48,11 @@ export function ObservationGuide({
 
       <div className="mt-4 grid grid-cols-[1.2fr_1fr] gap-4 max-md:grid-cols-1">
         <div className="rounded bg-paper/70 p-3 text-[11px]">
-          <div className="flex items-center gap-1.5 font-bold text-stone-700">
-            <Camera size={16} /> 권장 사진·스마트폰 촬영 설정
+          <div className="flex items-center justify-between font-bold text-stone-700">
+            <div className="flex items-center gap-1.5">
+              <Camera size={16} /> 권장 사진·스마트폰 촬영 설정
+            </div>
+            <AiBadge label="AI 추천" variant="subtle" size="sm" />
           </div>
           <p className="mt-1.5 font-medium text-ink">{guide.cameraSetting}</p>
         </div>
@@ -67,3 +74,4 @@ export function ObservationGuide({
     </section>
   );
 }
+

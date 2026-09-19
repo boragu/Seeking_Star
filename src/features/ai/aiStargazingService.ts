@@ -23,41 +23,84 @@ export interface StargazingObservationGuide {
 }
 
 /**
- * 관광 빅데이터(혼잡도, 거리, 야영장 인프라) 기반 추천 사유 분석 생성
+ * 관광 빅데이터(혼잡도, 거리, 야영장 인프라) 기반 장소별 맞춤 추천 사유 분석 생성
  */
 export function analyzeRecommendationReason(
   destination: RankedDestination,
   planner: PlannerState
 ): RecommendationAnalysis {
-  const calmScore = destination.calm ?? 75;
+  const calmScore = destination.calm ?? (destination.concentrationRate !== null ? Math.round(100 - destination.concentrationRate) : 75);
   const campgroundsCount = destination.nearbyCampgrounds?.length ?? 0;
-  const travelMins = destination.travelMinutesEstimate ?? 60;
-  const contrastSpot = destination.name.includes("안반데기") ? "육백마지기" : "안반데기";
+  const relatedCount = destination.relatedPlaces?.length ?? 0;
+  const travelMins = destination.travelMinutesEstimate ?? (destination.distanceKm ? Math.round((destination.distanceKm / 70) * 60) : 60);
+  const distance = destination.distanceKm ? `${destination.distanceKm}km` : `약 ${travelMins}분`;
+  const isHighDensity = calmScore < 50;
 
-  const reasons: RecommendationReasonItem[] = [
-    {
-      title: "과밀 분산 및 진입 편의",
-      description: `${contrastSpot} 등 대표 과밀지 대비 한적도 ${calmScore}점을 기록하여, 좁은 산간 도로의 정체와 대기 시간 없이 쾌적하게 진입할 수 있습니다.`,
-    },
-    {
-      title: "안전 체류 및 야영 인프라",
-      description:
-        campgroundsCount > 0
-          ? `반경 20km 내에 공공데이터 등록 정식 야영장 ${campgroundsCount}곳이 인접하여, 노상 불법 차박 걱정 없이 안전하게 체류할 수 있습니다.`
-          : "주변 15분 내 합법적 주차 구역과 기초 편의시설 접근성을 확보했습니다.",
-    },
-    {
-      title: "적정 주행 및 야간 시야 확보",
-      description: `${planner.departure}에서 약 ${travelMins}분 이동 거리로 심야 운전 피로를 줄이며, 주변 인공 조명이 차단되어 안정적인 밤하늘 시야를 제공합니다.`,
-    },
-  ];
+  let headline = `${destination.name} 추천 이유`;
+  let summary = "";
 
-  return {
-    headline: `과밀 관측지 우회 및 쾌적도 분석`,
-    summary: `관광지 집중률 예측과 이동 거리, 주변 야영장 인프라를 종합 검토하여 산간 1차선 병목을 피하고 최적의 관측 환경을 누릴 수 있는 곳으로 선정했습니다.`,
-    reasons,
-  };
+  if (isHighDensity) {
+    headline = `${destination.name} 관측 및 방문 유의 안내`;
+    summary = `전국적 인지도로 야간 방문객 집중률이 높은 명소입니다. 산간 진입로 정체와 주차 대기 시간을 고려하여 심야 시간대 분산 방문을 권장합니다.`;
+  } else if (calmScore >= 80) {
+    headline = `과밀 명소 우회: 한적한 밤하늘과 여유로운 진입`;
+    summary = `대표 과밀 명소(안반데기·육백마지기 등)의 좁은 산간 병목과 주차 대기를 피해, 한적하고 쾌적하게 별을 관측할 수 있는 대안 장소입니다.`;
+  } else {
+    headline = `이동 거리와 체류 편의의 균형 잡힌 관측지`;
+    summary = `출발지 이동 소요시간과 현장 체류 인프라가 고르게 갖추어져 있어 심야에도 안전하게 다녀올 수 있는 관측지입니다.`;
+  }
+
+  const reasons: RecommendationReasonItem[] = [];
+
+  // 1. 혼잡 분산 & 진입 여유
+  if (isHighDensity) {
+    reasons.push({
+      title: "혼잡 분산 권장",
+      description: `현재 한적도 ${calmScore}점으로 야간 방문객이 많습니다. 진입로 정체를 피해 밤 22시 이후 또는 평일 방문을 권장합니다.`,
+    });
+  } else {
+    const contrast = destination.name.includes("안반데기") ? "주요 과밀지" : "안반데기 등 과밀 명소";
+    reasons.push({
+      title: "과밀 분산 & 원활한 진입",
+      description: `${contrast} 대비 한적도 ${calmScore}점으로, 산간 1차선 병목이나 장시간 주차 대기 없이 여유롭게 진입할 수 있습니다.`,
+    });
+  }
+
+  // 2. 이동 효율 & 안전 주행
+  if (travelMins <= 90) {
+    reasons.push({
+      title: "적정 주행 & 심야 운전 안전",
+      description: `${planner.departure}에서 편도 ${distance}(약 ${travelMins}분) 소요로 심야 왕복 운전 피로를 크게 줄일 수 있습니다.`,
+    });
+  } else {
+    reasons.push({
+      title: "광공해 차단 & 탁 트인 시계",
+      description: `${planner.departure} 기준 ${distance} 떨어진 청정 고지대로, 도심 인공 조명이 차단되어 안정적인 밤하늘 시야를 제공합니다.`,
+    });
+  }
+
+  // 3. 합법 체류 & 야영 인프라
+  if (campgroundsCount > 0) {
+    reasons.push({
+      title: "합법 체류 & 안전 야영 인프라",
+      description: `반경 20km 내에 공공데이터 등록 정식 캠핑장 ${campgroundsCount}곳이 있어, 노상 불법 차박 없이 안전하게 머무를 수 있습니다.`,
+    });
+  } else if (relatedCount > 0) {
+    reasons.push({
+      title: "주변 연계 관광 인프라",
+      description: `인근에 ${relatedCount}곳의 문화·자연 관광지가 연계되어 있어 주간 여행과 야간 관측 일정을 함께 구성할 수 있습니다.`,
+    });
+  } else {
+    reasons.push({
+      title: "기초 편의시설 접근성",
+      description: "합법적 주차 공간과 기초 편의시설 접근성을 확보하여 야간 체류의 안전을 지원합니다.",
+    });
+  }
+
+  return { headline, summary, reasons };
 }
+
+
 
 /**
  * 일시 및 관측지 좌표 기반 현장 관측 가이드 생성
