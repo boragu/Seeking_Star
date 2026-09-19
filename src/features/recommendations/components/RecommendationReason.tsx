@@ -1,5 +1,4 @@
 import { CheckCircle, Info, ShieldCheck } from "@phosphor-icons/react";
-import { AiBadge } from "../../../components/ui/AiBadge";
 import type { PlannerState } from "../../../domain/types";
 import type { RankedDestination } from "../../../lib/recommendationEngine";
 import { analyzeRecommendationReason } from "../../ai/aiStargazingService";
@@ -25,7 +24,6 @@ export function RecommendationReason({
               {analysis.headline}
             </h3>
           </div>
-          <AiBadge label="AI 분석" variant="teal" />
         </div>
         <span className="shrink-0 text-[11px] text-stone-500">과밀 분산 & 안심 여정</span>
       </div>

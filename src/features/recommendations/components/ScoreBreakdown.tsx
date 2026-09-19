@@ -1,5 +1,4 @@
 import { Info } from "@phosphor-icons/react";
-import { AiBadge } from "../../../components/ui/AiBadge";
 import type { RankedDestination, ScoreKey } from "../../../lib/recommendationEngine";
 
 interface MetricSlot {
@@ -37,7 +36,6 @@ export function ScoreBreakdown({ destination }: { destination: RankedDestination
       <div className="mb-4 flex items-center justify-between gap-2 max-sm:flex-wrap">
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-[12px] font-bold text-teal whitespace-nowrap">항목별 지표 분석</span>
-          <AiBadge label="AI 분석" variant="teal" />
         </div>
         <span className="shrink-0 text-[11px] text-stone-500 whitespace-nowrap">공공데이터 기준 가중치 산출</span>
       </div>

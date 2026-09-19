@@ -1,7 +1,7 @@
 import { MoonStars, NavigationArrow, Tent } from "@phosphor-icons/react";
 
 const guideItems = [
-  { icon: MoonStars, label: "AI 혼잡 분산", copy: "혼잡도가 낮은 관측지 AI 우선 추천" },
+  { icon: MoonStars, label: "빅데이터 혼잡 분산", copy: "혼잡도가 낮은 안심 관측지 우선 추천" },
   { icon: NavigationArrow, label: "안전 이동 경로", copy: "출발지 기준 거리 및 소요 시간" },
   { icon: Tent, label: "체류 연계", copy: "인근 등록 야영장·캠핑장 정보" },
 ];

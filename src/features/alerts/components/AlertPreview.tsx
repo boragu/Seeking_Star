@@ -1,5 +1,4 @@
 import { Bell, Check, Clock, PaperPlaneTilt, SealCheck, WarningCircle } from "@phosphor-icons/react";
-import { AiBadge } from "../../../components/ui/AiBadge";
 import { Button } from "../../../components/ui/Button";
 import type { Destination } from "../../../domain/types";
 import type { NotificationPermissionState } from "../notificationService";
@@ -37,7 +36,6 @@ export function AlertPreview({
       <div className="absolute -right-12 -top-12 size-40 rounded-full border border-gold/12" />
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-display text-xl font-bold">알림 수신 미리보기</h2>
-        <AiBadge label="AI 알림" variant="dark" />
       </div>
 
       <div className="my-6 rounded-2xl border border-cream/18 bg-white/8 p-5 backdrop-blur">

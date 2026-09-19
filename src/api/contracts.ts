@@ -22,6 +22,9 @@ export interface RecommendationResponse {
     areaCd: string;
     signguCd: string;
     baseYm: string;
+    people?: string;
+    transport?: string;
+    accessibility?: boolean;
   };
   destinations: Destination[];
   sources: ApiSource[];

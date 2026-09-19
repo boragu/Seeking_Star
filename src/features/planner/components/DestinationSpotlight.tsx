@@ -1,7 +1,6 @@
 import { ArrowRight, MapPin } from "@phosphor-icons/react";
 import type { Navigate } from "../../../app/navigation";
 import { useApp } from "../../../app/AppContext";
-import { AiBadge } from "../../../components/ui/AiBadge";
 import { Button } from "../../../components/ui/Button";
 import { SectionHeading } from "../../../components/ui/SectionHeading";
 import type { RankedDestination } from "../../../lib/recommendationEngine";
@@ -10,6 +9,8 @@ import { DestinationFacts } from "../../recommendations/components/DestinationFa
 import { DestinationMedia } from "../../recommendations/components/DestinationMedia";
 import { RecommendationReason } from "../../recommendations/components/RecommendationReason";
 import { ScoreBreakdown } from "../../recommendations/components/ScoreBreakdown";
+import { AiJourneyBriefing } from "../../ai/components/AiJourneyBriefing";
+import { CongestionForecast } from "../../recommendations/components/CongestionForecast";
 
 export function DestinationSpotlight({
   destination,
@@ -27,8 +28,8 @@ export function DestinationSpotlight({
   
   const isRecommended = rankIndex >= 0 && rankIndex < 5 && (destination.analysis.total ?? 0) >= 60;
   const rankLabel = isRecommended 
-    ? `AI ${rankIndex + 1}순위 추천` 
-    : `AI ${rankIndex + 1}순위 (추천 보류)`;
+    ? `추천 ${rankIndex + 1}순위` 
+    : `${rankIndex + 1}순위 (추천 보류)`;
 
   return (
     <section className="border border-line bg-white/52 p-6 shadow-[0_20px_60px_rgba(68,49,29,.07)] max-md:p-4">
@@ -43,9 +44,6 @@ export function DestinationSpotlight({
         <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/10 to-transparent" />
         <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-5 text-cream">
           <div className="min-w-0">
-            <div className="mb-1 flex items-center gap-2">
-              <AiBadge label={isRecommended ? "AI 추천" : "AI 분석"} variant="dark" />
-            </div>
             <h2 className="truncate font-display text-[clamp(26px,3vw,38px)] font-bold">{destination.name}</h2>
             <p className="mt-1 flex items-center gap-1 truncate text-[11px] text-cream/70">
               <MapPin />
@@ -61,9 +59,15 @@ export function DestinationSpotlight({
       <div className="mt-4">
         <DestinationFacts destination={destination} />
       </div>
+
+      {/* 초개인화 AI 맞춤 여정 브리핑 */}
+      <AiJourneyBriefing destination={destination} planner={planner} />
       
       {/* 분산 및 추천 사유 분석 */}
       <RecommendationReason destination={destination} planner={planner} rankIndex={rankIndex} />
+
+      {/* 시간대별 혼잡도 및 산간 병목 예측 차트 */}
+      <CongestionForecast destination={destination} dateString={planner.date} />
 
       <div className="mt-4">
         <ScoreBreakdown destination={destination} />
