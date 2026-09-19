@@ -1,5 +1,6 @@
 import { useRoute } from "./app/navigation";
 import { AppProvider } from "./app/AppContext";
+import { ErrorBoundary } from "./components/ui/ErrorBoundary";
 import { AlertsPage } from "./pages/AlertsPage";
 import { LandingPage } from "./pages/LandingPage";
 import { MapPage } from "./pages/MapPage";
@@ -18,8 +19,10 @@ function AppRouter() {
 
 export function App() {
   return (
-    <AppProvider>
-      <AppRouter />
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <AppRouter />
+      </AppProvider>
+    </ErrorBoundary>
   );
 }
