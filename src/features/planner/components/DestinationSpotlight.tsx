@@ -1,11 +1,13 @@
-import { ArrowRight, BookmarkSimple, MapPin } from "@phosphor-icons/react";
+import { ArrowRight, MapPin } from "@phosphor-icons/react";
 import type { Navigate } from "../../../app/navigation";
+import { useApp } from "../../../app/AppContext";
 import { Button } from "../../../components/ui/Button";
 import { SectionHeading } from "../../../components/ui/SectionHeading";
 import type { RankedDestination } from "../../../lib/recommendationEngine";
 import { DestinationAlternatives } from "../../recommendations/components/DestinationAlternatives";
 import { DestinationFacts } from "../../recommendations/components/DestinationFacts";
 import { DestinationMedia } from "../../recommendations/components/DestinationMedia";
+import { RecommendationReason } from "../../recommendations/components/RecommendationReason";
 import { ScoreBreakdown } from "../../recommendations/components/ScoreBreakdown";
 
 export function DestinationSpotlight({
@@ -19,6 +21,8 @@ export function DestinationSpotlight({
   navigate: Navigate;
   onSelect: (id: string) => void;
 }) {
+  const { planner } = useApp();
+
   return (
     <section className="border border-line bg-white/52 p-6 shadow-[0_20px_60px_rgba(68,49,29,.07)] max-md:p-4">
       <SectionHeading
@@ -47,6 +51,10 @@ export function DestinationSpotlight({
       <div className="mt-4">
         <DestinationFacts destination={destination} />
       </div>
+      
+      {/* 분산 및 추천 사유 분석 */}
+      <RecommendationReason destination={destination} planner={planner} />
+
       <div className="mt-4">
         <ScoreBreakdown destination={destination} />
       </div>

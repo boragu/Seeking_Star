@@ -9,6 +9,7 @@ import { PageHeading } from "../components/ui/PageHeading";
 import { JourneyFacts } from "../features/journey/components/JourneyFacts";
 import { JourneyTimeline } from "../features/journey/components/JourneyTimeline";
 import { NearbyPlaceList } from "../features/journey/components/NearbyPlaceList";
+import { ObservationGuide } from "../features/journey/components/ObservationGuide";
 import { useShareJourney } from "../features/journey/useShareJourney";
 import { addMinutesToTime, formatDateInputKorean } from "../lib/currentContext";
 
@@ -100,6 +101,7 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
             empty="연관 관광지 정보가 없습니다."
           />
         </div>
+        <ObservationGuide destination={destination} planner={planner} route={route} />
         <section className="mt-6 grid grid-cols-[1fr_auto_auto] items-center gap-3 border-t border-line pt-6 max-md:grid-cols-2">
           <div className="max-md:col-span-2">
             <h2 className="font-display text-2xl font-bold">{destination.name}</h2>
