@@ -43,6 +43,7 @@ export function DestinationSpotlight({
           selectedId={destination.id}
           onSelect={onSelect}
           onBackToList={onBackToList}
+          className="mb-6"
         />
 
         <SectionHeading

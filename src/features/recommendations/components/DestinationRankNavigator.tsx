@@ -8,11 +8,13 @@ export function DestinationRankNavigator({
   selectedId,
   onSelect,
   onBackToList,
+  className,
 }: {
   items: RankedDestination[];
   selectedId: string;
   onSelect: (id: string) => void;
   onBackToList?: () => void;
+  className?: string;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentIndex = items.findIndex((item) => item.id === selectedId);
@@ -30,7 +32,7 @@ export function DestinationRankNavigator({
   };
 
   return (
-    <div className="flex flex-col gap-2.5 rounded-xl border border-line bg-white/75 p-3 shadow-xs">
+    <div className={cn("flex flex-col gap-2.5 rounded-xl border border-line bg-white/75 p-3 shadow-xs", className)}>
       {/* 상단 액션 바: 목록으로 가기 & 이전/다음 네비게이션 */}
       <div className="flex items-center justify-between gap-2 border-b border-line/40 pb-2">
         <button
