@@ -2,7 +2,6 @@ import { ArrowRight } from "@phosphor-icons/react";
 import type { Navigate } from "../app/navigation";
 import { useApp } from "../app/AppContext";
 import { AppPage } from "../components/layout/AppPage";
-import { JourneyStepper } from "../components/layout/JourneyStepper";
 import { BottomSheet } from "../components/ui/BottomSheet";
 import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
@@ -31,14 +30,10 @@ export function MapPage({ navigate }: { navigate: Navigate }) {
 
   return (
     <AppPage path="/map" navigate={navigate} tone="night" className="max-md:h-[100dvh] max-md:overflow-hidden max-md:pb-0">
-      <div className="flex min-h-14 items-center bg-[#071521ee] px-6 max-md:hidden">
-        <JourneyStepper current={2} dark />
-      </div>
-
       {/* 통합 지도 및 경로 뷰 (데스크톱 2컬럼 / 모바일 전체화면 지도 + 바텀시트) */}
       <main
         id="main-content"
-        className="relative h-[calc(100vh-132px)] min-h-[610px] w-full overflow-hidden max-md:h-[calc(100dvh-66px)] max-md:min-h-0 md:grid md:grid-cols-[410px_1fr] max-lg:md:grid-cols-[365px_1fr]"
+        className="relative h-[calc(100vh-76px)] min-h-[610px] w-full overflow-hidden max-md:h-[calc(100dvh-66px)] max-md:min-h-0 md:grid md:grid-cols-[410px_1fr] max-lg:md:grid-cols-[365px_1fr]"
       >
         {/* 데스크톱 사이드 패널 */}
         <div className="hidden h-full overflow-hidden md:block">
@@ -59,7 +54,7 @@ export function MapPage({ navigate }: { navigate: Navigate }) {
 
         {/* 모바일 하단 제스처 바텀시트 */}
         <div className="md:hidden">
-          <BottomSheet snapPoints={[0.26, 0.62, 0.9]}>
+          <BottomSheet snapPoints={[0.35, 0.65, 0.9]}>
             <RoutePanel
               isMobileSheet
               navigate={navigate}
@@ -70,6 +65,18 @@ export function MapPage({ navigate }: { navigate: Navigate }) {
               locationFeedback={location.feedback}
             />
           </BottomSheet>
+        </div>
+
+        {/* 모바일 하단 플로팅 캡슐 버튼 */}
+        <div className="fixed bottom-[calc(66px+14px+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-[60] md:hidden pointer-events-none w-max max-w-[calc(100vw-32px)]">
+          <button
+            type="button"
+            onClick={() => navigate("/trips")}
+            className="pointer-events-auto inline-flex items-center justify-center gap-2 rounded-full border border-gold-light/40 bg-gold px-5 py-2.5 text-[13px] font-bold text-[#241706] shadow-[0_8px_25px_rgba(0,0,0,0.5)] backdrop-blur-md transition duration-150 active:scale-95 hover:bg-gold-light"
+          >
+            <span>여정 확인 및 저장</span>
+            <ArrowRight weight="bold" size={15} />
+          </button>
         </div>
       </main>
     </AppPage>

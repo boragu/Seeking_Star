@@ -2,7 +2,6 @@ import type { ApiRequestError, RecommendationResponse } from "../api/contracts";
 import type { Navigate } from "../app/navigation";
 import { useApp } from "../app/AppContext";
 import { AppPage } from "../components/layout/AppPage";
-import { JourneyStepper } from "../components/layout/JourneyStepper";
 import { PageHeading } from "../components/ui/PageHeading";
 import { DestinationSpotlight } from "../features/planner/components/DestinationSpotlight";
 import { PlannerForm } from "../features/planner/components/PlannerForm";
@@ -25,7 +24,9 @@ export function PlannerPage({ navigate }: PlannerPageProps) {
   } = useApp();
 
   const recommendationView =
-    status === "loading" || status === "idle" ? (
+    status === "idle" ? (
+      <RecommendationState status="idle" onRetry={() => void reload()} />
+    ) : status === "loading" ? (
       <RecommendationState status="loading" onRetry={() => void reload()} />
     ) : status === "error" ? (
       <RecommendationState
@@ -53,9 +54,8 @@ export function PlannerPage({ navigate }: PlannerPageProps) {
     <AppPage path="/planner" navigate={navigate}>
       <main
         id="main-content"
-        className="mx-auto w-[min(1280px,calc(100%-64px))] py-8 max-md:w-[calc(100%-32px)] max-md:py-6"
+        className="mx-auto w-[min(1280px,calc(100%-64px))] py-8 max-md:w-[calc(100%-32px)] max-md:pt-6 max-md:pb-24"
       >
-        <JourneyStepper current={1} />
         <PageHeading
           title="별 관측지 탐색 및 추천"
           description="출발 위치와 일정을 입력하시면 혼잡도, 이동 거리, 인근 체류지를 종합 분석하여 최적의 장소를 안내합니다."

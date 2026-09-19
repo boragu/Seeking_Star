@@ -78,4 +78,6 @@ export interface SavedJourneyItem {
   campgroundCount: number;
   relatedCount: number;
   savedAt: string;
+  destination?: Destination;
+  planner?: PlannerState;
 }

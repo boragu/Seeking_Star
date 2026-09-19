@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { ArrowRight, BookmarkSimple, FolderStar, ListChecks, MapPin, ShareNetwork } from "@phosphor-icons/react";
+import { ArrowLeft, ArrowRight, BellRinging, BookmarkSimple, FolderStar, ListChecks, MapPin, MapTrifold, ShareNetwork } from "@phosphor-icons/react";
 import type { Navigate } from "../app/navigation";
 import { useApp } from "../app/AppContext";
 import { AppPage } from "../components/layout/AppPage";
-import { JourneyStepper } from "../components/layout/JourneyStepper";
 import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
 import { PageHeading } from "../components/ui/PageHeading";
@@ -43,6 +42,20 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
 
   const handleSelectFromVault = (destId: string) => {
     setSelectedId(destId);
+    const targetSaved = savedJourneys.find((j) => j.destinationId === destId);
+    if (targetSaved?.planner) {
+      setPlanner((prev) => ({
+        ...prev,
+        ...targetSaved.planner,
+      }));
+    } else if (targetSaved) {
+      setPlanner((prev) => ({
+        ...prev,
+        departure: targetSaved.departureName || prev.departure,
+        date: targetSaved.date || prev.date,
+        time: targetSaved.departureTime || prev.time,
+      }));
+    }
     setActiveTab("detail");
   };
 
@@ -70,7 +83,7 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
     <AppPage path="/trips" navigate={navigate}>
       <main
         id="main-content"
-        className="mx-auto w-[min(1160px,calc(100%-64px))] py-8 max-md:w-[calc(100%-32px)] max-md:py-6"
+        className="mx-auto w-[min(1160px,calc(100%-64px))] py-8 max-md:w-[calc(100%-32px))] max-md:pt-6 max-md:pb-24"
       >
         <JourneyStepper current={3} />
 
@@ -83,7 +96,13 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
                   ? "bg-teal text-white shadow-sm"
                   : "bg-white/40 text-stone-600 hover:bg-white/80"
               }`}
-              onClick={() => setActiveTab("detail")}
+              onClick={() => {
+                if (!destination && savedJourneys.length > 0) {
+                  handleSelectFromVault(savedJourneys[0].destinationId);
+                } else {
+                  setActiveTab("detail");
+                }
+              }}
               type="button"
             >
               <ListChecks size={18} />
@@ -179,21 +198,38 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
 
                 <ObservationGuide destination={destination} planner={planner} route={route} />
 
-                <section className="mt-6 grid grid-cols-[1fr_auto_auto] items-center gap-3 border-t border-line pt-6 max-md:grid-cols-2">
-                  <div className="max-md:col-span-2">
-                    <h2 className="font-display text-2xl font-bold">{destination.name}</h2>
-                    <p className="mt-1 flex items-center gap-1 text-[11px] text-stone-500">
-                      <MapPin />
-                      {destination.address || "주소 정보 확인 중"}
-                    </p>
+                {/* 하단 고정 플로팅 바 (PC & 모바일) */}
+                <div className="fixed inset-x-0 bottom-[calc(64px+env(safe-area-inset-bottom))] z-40 border-t border-cream/15 bg-[#06121ef5] text-cream shadow-[0_-12px_36px_rgba(0,0,0,0.4)] backdrop-blur-xl md:bottom-0">
+                  <div className="mx-auto flex w-[min(1160px,calc(100%-64px))] flex-col gap-3 py-3 max-md:w-[calc(100%-32px)] md:flex-row md:items-center md:justify-between md:py-4">
+                    <div className="min-w-0">
+                      <h2 className="truncate font-display text-lg font-bold text-cream md:text-xl">
+                        {destination.name}
+                      </h2>
+                      <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-cream/70 md:text-[12px]">
+                        <MapPin size={13} className="text-gold shrink-0" />
+                        <span>{destination.address || destination.region || "주소 정보 확인 중"}</span>
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 max-md:w-full md:gap-3 shrink-0">
+                      <Button
+                        variant="ghost"
+                        className="flex-1 md:flex-initial min-h-10 md:min-h-11 border-cream/30 bg-white/5 text-cream hover:bg-white/10 hover:border-cream/50 text-[12px] md:text-[13px] px-3.5"
+                        onClick={() => navigate("/map")}
+                      >
+                        <ArrowLeft size={15} weight="bold" />
+                        지도 경로 보기
+                      </Button>
+                      <Button
+                        variant="primary"
+                        className="flex-1 md:flex-initial min-h-10 md:min-h-11 text-[12px] md:text-[13px] px-4"
+                        onClick={() => navigate("/alerts")}
+                      >
+                        출발 알림 설정
+                        <ArrowRight size={15} weight="bold" />
+                      </Button>
+                    </div>
                   </div>
-                  <Button variant="secondary" onClick={() => navigate("/map")}>
-                    지도 경로 보기
-                  </Button>
-                  <Button onClick={() => navigate("/alerts")}>
-                    출발 알림 설정
-                  </Button>
-                </section>
+                </div>
               </>
             )}
           </>

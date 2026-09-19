@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { createDefaultPlanner } from "../domain/planner";
 import { createRouteEstimate } from "../domain/routeEstimate";
-import type { PlannerState } from "../domain/types";
+import type { Destination, PlannerState, SavedJourneyItem } from "../domain/types";
 import { useJourneySelection } from "../features/journey/useJourneySelection";
 import { useDeviceLocation } from "../features/location/useDeviceLocation";
 import { useRecommendations } from "../features/recommendations/useRecommendations";
@@ -12,14 +12,58 @@ export type AppContextType = ReturnType<typeof useAppModel>;
 
 const AppContext = createContext<AppContextType | null>(null);
 
+function savedItemToDestination(item: SavedJourneyItem): Destination {
+  if (item.destination) return item.destination;
+  return {
+    id: item.destinationId,
+    name: item.destinationName,
+    address: item.destinationAddress,
+    region: item.destinationRegion,
+    latitude: null,
+    longitude: null,
+    imageUrl: item.imageUrl ?? null,
+    thumbnailUrl: item.imageUrl ?? null,
+    contentTypeId: null,
+    tel: null,
+    modifiedAt: item.savedAt,
+    source: "KorService2",
+    concentrationRate: null,
+    concentrationDate: null,
+    calm: item.calm ?? null,
+    distanceKm: item.distanceKm ?? null,
+    travelMinutesEstimate: item.travelMinutesEstimate ?? null,
+    travelEstimateMethod: null,
+    nearbyCampgrounds: [],
+    relatedPlaces: [],
+    accessible: null,
+    cloud: null,
+    parkingMinutes: null,
+    observingWindow: null,
+  };
+}
+
 function useAppModel(path: string) {
   const [planner, setPlanner] = useState<PlannerState>(createDefaultPlanner);
   const journey = useJourneySelection();
   const { selectedId, setSelectedId } = journey;
   const location = useDeviceLocation(setPlanner);
-  const recommendations = useRecommendations(planner, path !== "/");
+  const recommendations = useRecommendations(planner, false);
   const ranked = useMemo(() => rankDestinations(recommendations.data?.destinations ?? [], planner), [recommendations.data, planner]);
-  const destination = ranked.find((item) => item.id === selectedId) ?? ranked[0] ?? null;
+  
+  const destination = useMemo(() => {
+    if (selectedId) {
+      const fromRanked = ranked.find((item) => item.id === selectedId);
+      if (fromRanked) return fromRanked;
+      const fromSaved = journey.savedJourneys.find((item) => item.destinationId === selectedId);
+      if (fromSaved) return savedItemToDestination(fromSaved);
+    }
+    if (ranked.length > 0) return ranked[0];
+    if (journey.savedJourneys.length > 0) {
+      return savedItemToDestination(journey.savedJourneys[0]);
+    }
+    return null;
+  }, [ranked, selectedId, journey.savedJourneys]);
+
   const route = useMemo(() => createRouteEstimate(destination), [destination]);
 
   const reloadRecommendations = useCallback(async () => {
@@ -28,8 +72,13 @@ function useAppModel(path: string) {
   }, [setSelectedId, recommendations]);
 
   useEffect(() => {
-    if (ranked.length && (!selectedId || !ranked.some((item) => item.id === selectedId))) setSelectedId(ranked[0].id);
-  }, [ranked, selectedId, setSelectedId]);
+    if (!ranked.length) return;
+    const isSelectedInRanked = ranked.some((item) => item.id === selectedId);
+    const isSelectedInSaved = journey.savedJourneys.some((item) => item.destinationId === selectedId);
+    if (!selectedId || (!isSelectedInRanked && !isSelectedInSaved)) {
+      setSelectedId(ranked[0].id);
+    }
+  }, [ranked, selectedId, journey.savedJourneys, setSelectedId]);
 
   return { 
     planner, 

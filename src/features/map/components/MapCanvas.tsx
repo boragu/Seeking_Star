@@ -1,4 +1,4 @@
-import { ArrowSquareOut, Compass, Crosshair, MapPin, NavigationArrow, StarFour } from "@phosphor-icons/react";
+import { Compass, Crosshair, StarFour } from "@phosphor-icons/react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef } from "react";
@@ -129,15 +129,42 @@ export function MapCanvas({
       }
     }
 
+    // 모바일 바텀시트 가림을 고려한 패딩 및 중심점 계산 헬퍼
+    const getMapPadding = () => {
+      if (typeof window !== "undefined" && window.innerWidth < 768) {
+        const bottomOffset = Math.round(window.innerHeight * 0.36 + 66);
+        return {
+          paddingTopLeft: L.point(30, 80),
+          paddingBottomRight: L.point(30, bottomOffset),
+        };
+      }
+      return {
+        padding: L.point(60, 60),
+      };
+    };
+
+    const getAdjustedCenter = (lat: number, lng: number, zoom: number): [number, number] => {
+      if (typeof window === "undefined" || window.innerWidth >= 768) {
+        return [lat, lng];
+      }
+      const bottomOffset = Math.round(window.innerHeight * 0.36 + 66);
+      const point = map.project([lat, lng], zoom);
+      const adjustedPoint = L.point(point.x, point.y + bottomOffset / 2);
+      const adjustedLatLng = map.unproject(adjustedPoint, zoom);
+      return [adjustedLatLng.lat, adjustedLatLng.lng];
+    };
+
     // 4. 화면에 맞게 자동 줌/패닝 (Fit Bounds) - 초기 로드는 비동기 애니메이션 없이 즉시 설정
     if (boundsPoints.length > 1) {
       map.fitBounds(L.latLngBounds(boundsPoints), {
-        padding: [60, 60],
+        ...getMapPadding(),
         maxZoom: 13,
         animate: false,
       });
     } else if (boundsPoints.length === 1) {
-      map.setView(boundsPoints[0], 12, { animate: false });
+      const [lat, lng] = boundsPoints[0] as [number, number];
+      const center = getAdjustedCenter(lat, lng, 12);
+      map.setView(center, 12, { animate: false });
     }
 
     // ResizeObserver로 반응형 레이아웃 변경 시 지도 리사이즈 동기화
@@ -156,50 +183,63 @@ export function MapCanvas({
 
   const fitAll = () => {
     if (!mapInstanceRef.current || !hasOrigin || !hasDest) return;
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    const bottomOffset = isMobile ? Math.round(window.innerHeight * 0.36 + 66) : 60;
+
     mapInstanceRef.current.fitBounds(
       L.latLngBounds([
         [planner.latitude!, planner.longitude!],
         [destination.latitude!, destination.longitude!],
       ]),
-      { padding: [60, 60] }
+      isMobile
+        ? {
+            paddingTopLeft: L.point(30, 80),
+            paddingBottomRight: L.point(30, bottomOffset),
+            maxZoom: 13,
+            animate: true,
+          }
+        : {
+            padding: [60, 60],
+            maxZoom: 13,
+            animate: true,
+          }
     );
   };
 
   const focusOrigin = () => {
     if (!mapInstanceRef.current || !hasOrigin) return;
-    mapInstanceRef.current.flyTo([planner.latitude!, planner.longitude!], 14, { duration: 0.8 });
+    const map = mapInstanceRef.current;
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    if (isMobile) {
+      const bottomOffset = Math.round(window.innerHeight * 0.36 + 66);
+      const point = map.project([planner.latitude!, planner.longitude!], 14);
+      const adjustedPoint = L.point(point.x, point.y + bottomOffset / 2);
+      const adjustedLatLng = map.unproject(adjustedPoint, 14);
+      map.flyTo([adjustedLatLng.lat, adjustedLatLng.lng], 14, { duration: 0.8 });
+    } else {
+      map.flyTo([planner.latitude!, planner.longitude!], 14, { duration: 0.8 });
+    }
   };
 
   const focusDest = () => {
     if (!mapInstanceRef.current || !hasDest) return;
-    mapInstanceRef.current.flyTo([destination.latitude!, destination.longitude!], 14, { duration: 0.8 });
+    const map = mapInstanceRef.current;
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    if (isMobile) {
+      const bottomOffset = Math.round(window.innerHeight * 0.36 + 66);
+      const point = map.project([destination.latitude!, destination.longitude!], 14);
+      const adjustedPoint = L.point(point.x, point.y + bottomOffset / 2);
+      const adjustedLatLng = map.unproject(adjustedPoint, 14);
+      map.flyTo([adjustedLatLng.lat, adjustedLatLng.lng], 14, { duration: 0.8 });
+    } else {
+      map.flyTo([destination.latitude!, destination.longitude!], 14, { duration: 0.8 });
+    }
   };
 
   return (
     <section className="relative size-full min-h-[440px] overflow-hidden bg-[#e5e0d8]">
       {/* 리플릿 인터랙티브 맵 컨테이너 */}
       <div ref={mapContainerRef} className="size-full z-0" />
-
-      {/* 좌측 상단 위치/경로 요약 오버레이 */}
-      <div className="absolute left-4 top-4 z-10 max-w-[320px] rounded-xl border border-cream/20 bg-ink/90 p-3 text-[11px] text-cream shadow-xl backdrop-blur-md">
-        <div className="flex items-center gap-2 text-gold-light font-bold">
-          <NavigationArrow size={14} className="text-[#8ec0b2]" />
-          <span>이동 경로 지도 안내</span>
-        </div>
-        <div className="mt-2 space-y-1 text-[11px] leading-tight">
-          <div className="flex items-center gap-1 text-cream/85">
-            <span className="text-teal-300">📍 출발:</span> {planner.departure}
-          </div>
-          <div className="flex items-center gap-1 text-gold-light">
-            <span>⭐ 도착:</span> {destination.name}
-          </div>
-          {route && (
-            <div className="mt-1 text-[10px] text-cream/60">
-              거리: {route.distance} · 예상 소요: {route.duration}
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* 우측 상단 빠른 시점 전환 컨트롤 버튼 */}
       <div className="absolute right-4 top-4 z-10 flex flex-col gap-1.5">

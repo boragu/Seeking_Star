@@ -57,6 +57,8 @@ export function useJourneySelection() {
       campgroundCount: destination.nearbyCampgrounds?.length ?? 0,
       relatedCount: destination.relatedPlaces?.length ?? 0,
       savedAt: new Date().toISOString(),
+      destination,
+      planner,
     };
     const next = [newItem, ...savedJourneys.filter((j) => j.destinationId !== destination.id)];
     persistJourneys(next);

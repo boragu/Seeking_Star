@@ -5,7 +5,7 @@ import type { PlannerState } from "../../domain/types";
 
 export type RecommendationStatus = "idle" | "loading" | "success" | "error";
 
-export function useRecommendations(planner: PlannerState, enabled: boolean) {
+export function useRecommendations(planner: PlannerState, autoFetch: boolean = false) {
   const [data, setData] = useState<RecommendationResponse | null>(null);
   const [status, setStatus] = useState<RecommendationStatus>("idle");
   const [error, setError] = useState<ApiRequestError | null>(null);
@@ -32,10 +32,10 @@ export function useRecommendations(planner: PlannerState, enabled: boolean) {
   }, [planner]);
 
   useEffect(() => {
-    if (!enabled || requested.current) return;
+    if (!autoFetch || requested.current) return;
     requested.current = true;
     void load();
-  }, [enabled, load]);
+  }, [autoFetch, load]);
 
   return { data, status, error, reload: load };
 }

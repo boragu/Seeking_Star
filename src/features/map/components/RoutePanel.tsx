@@ -126,7 +126,7 @@ export function RoutePanel({
         {destination.address || `${destination.latitude ?? "—"}, ${destination.longitude ?? "—"}`}
       </p>
 
-      <div className="mt-5 pb-6">
+      <div className="mt-5 pb-6 hidden md:block">
         <Button className="w-full h-11" variant="night" onClick={() => navigate("/trips")}>
           여정 확인 및 저장 <ArrowRight />
         </Button>

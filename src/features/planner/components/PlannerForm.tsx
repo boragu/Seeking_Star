@@ -49,13 +49,17 @@ export function PlannerForm({
   return (
     <section className="sticky top-[96px] self-start border border-line bg-[rgba(255,253,247,.72)] p-6 shadow-[0_20px_60px_rgba(68,49,29,.07)] backdrop-blur-md max-md:static max-md:p-5">
       <div 
-        className="flex items-center justify-between cursor-pointer" 
-        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="flex items-center justify-between max-md:cursor-pointer" 
+        onClick={() => {
+          if (typeof window !== "undefined" && window.innerWidth < 768) {
+            setIsCollapsed(!isCollapsed);
+          }
+        }}
         title={isCollapsed ? "조건 설정 펼치기" : "조건 설정 접기"}
       >
         <SectionHeading number="01" title="조건 설정" description="출발지 및 일정 정보" />
         <button 
-          className="text-stone-400 hover:text-stone-700 transition" 
+          className="text-stone-400 hover:text-stone-700 transition md:hidden" 
           aria-label={isCollapsed ? "조건 설정 펼치기" : "조건 설정 접기"}
           type="button"
         >
@@ -64,12 +68,10 @@ export function PlannerForm({
       </div>
 
       <div 
-        className="overflow-hidden transition-all duration-500 ease-in-out"
-        style={{ 
-          maxHeight: isCollapsed ? 0 : 800, 
-          opacity: isCollapsed ? 0 : 1,
-          marginTop: isCollapsed ? 0 : 16,
-        }}
+        className={cn(
+          "overflow-hidden transition-all duration-500 ease-in-out md:!max-h-none md:!opacity-100 md:!mt-4",
+          isCollapsed ? "max-md:max-h-0 max-md:opacity-0 max-md:mt-0" : "max-md:max-h-[850px] max-md:opacity-100 max-md:mt-4"
+        )}
       >
         <div className="space-y-4">
         <Field

@@ -68,11 +68,26 @@ export function DestinationSpotlight({
       <div className="mt-4">
         <ScoreBreakdown destination={destination} />
       </div>
-      <DestinationAlternatives items={items} selectedId={destination.id} onSelect={onSelect} />
-      <div className="mt-5 max-sm:grid-cols-1">
+
+      {/* 데스크톱 인라인 버튼: 항목별 지표 분석 바로 아래 배치 */}
+      <div className="mt-4 hidden md:block">
         <Button className="w-full" variant="primary" onClick={() => navigate("/map")}>
-          지도 경로 확인 <ArrowRight />
+          별지도로 경로 확인하기 <ArrowRight />
         </Button>
+      </div>
+
+      <DestinationAlternatives items={items} selectedId={destination.id} onSelect={onSelect} />
+
+      {/* 모바일 하단 플로팅 캡슐 버튼 */}
+      <div className="fixed bottom-[calc(66px+14px+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-[60] md:hidden pointer-events-none w-max max-w-[calc(100vw-32px)]">
+        <button
+          type="button"
+          onClick={() => navigate("/map")}
+          className="pointer-events-auto inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-rust px-5 py-2.5 text-[13px] font-bold text-white shadow-[0_8px_25px_rgba(185,95,49,0.45)] backdrop-blur-md transition duration-150 active:scale-95 hover:bg-[#a94f26]"
+        >
+          <span>별지도로 경로 확인하기</span>
+          <ArrowRight weight="bold" size={15} />
+        </button>
       </div>
     </section>
   );

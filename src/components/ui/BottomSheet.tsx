@@ -81,7 +81,7 @@ export function BottomSheet({
     onSnapChange?.(nextIndex);
   };
 
-  const calculatedHeight = Math.max(160, currentHeightPx - (isDragging ? dragOffset : 0));
+  const calculatedHeight = Math.max(180, currentHeightPx - (isDragging ? dragOffset : 0));
 
   return (
     <div

@@ -39,25 +39,22 @@ export function scoreDestination(
   const breakdown: ScoreBreakdown = {};
 
   // 1. 혼잡 분산도 (한적도)
-  const crowdScore = destination.calm ?? (destination.concentrationRate !== null ? Math.round(100 - destination.concentrationRate) : 85);
-  breakdown.crowd = Math.round(clamp(crowdScore));
+  if (destination.calm !== null) {
+    breakdown.crowd = Math.round(clamp(destination.calm));
+  }
 
   // 2. 이동 효율성
   if (destination.travelMinutesEstimate !== null) {
     breakdown.travel = Math.round(clamp(100 - (destination.travelMinutesEstimate / 240) * 45));
-  } else if (destination.distanceKm !== null) {
-    breakdown.travel = Math.round(clamp(100 - (destination.distanceKm / 200) * 45));
-  } else {
-    breakdown.travel = 80;
   }
 
   // 3. 인근 캠핑/차박 편의
-  if (destination.nearbyCampgrounds) {
+  if (destination.nearbyCampgrounds && destination.nearbyCampgrounds.length > 0) {
     breakdown.camping = Math.round(clamp(60 + Math.min(5, destination.nearbyCampgrounds.length) * 8));
   }
 
   // 4. 연관 관광 연계성
-  if (destination.relatedPlaces) {
+  if (destination.relatedPlaces && destination.relatedPlaces.length > 0) {
     breakdown.sightseeing = Math.round(clamp(60 + Math.min(5, destination.relatedPlaces.length) * 8));
   }
 
@@ -74,7 +71,7 @@ export function scoreDestination(
     ? null
     : Math.round(available.reduce((sum, [key, value]) => sum + value * (scoringWeights[key] ?? 0), 0) / availableWeight);
   const strongest = [...available].sort((a, b) => b[1] - a[1]).slice(0, 2).map(([key]) => key);
-  const dataCompleteness = Math.round((available.length / 4) * 100);
+  const dataCompleteness = Math.round((available.length / 5) * 100);
 
   return { total, breakdown, strongest, dataCompleteness };
 }
