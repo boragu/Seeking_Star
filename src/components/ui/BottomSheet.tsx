@@ -1,4 +1,3 @@
-import { CaretDown, CaretUp } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 export interface BottomSheetProps {
@@ -95,23 +94,13 @@ export function BottomSheet({
     >
       {/* 드래그 핸들 영역 */}
       <div
-        className="flex flex-col items-center justify-center pt-2.5 pb-2 cursor-grab active:cursor-grabbing select-none shrink-0"
+        className="flex items-center justify-center py-3 cursor-grab active:cursor-grabbing select-none shrink-0"
         onTouchStart={handleTouchStart}
         onMouseDown={handleTouchStart}
         onClick={toggleSnap}
+        aria-label="바텀시트 높이 조절 핸들"
       >
         <div className="h-1.5 w-12 rounded-full bg-cream/35 hover:bg-cream/55 transition" />
-        <div className="mt-1.5 flex items-center gap-1 text-[10px] text-cream/50">
-          {currentSnapIndex === 0 ? (
-            <>
-              <span>상세 경로 보기</span> <CaretUp size={12} />
-            </>
-          ) : (
-            <>
-              <span>지도 넓게 보기</span> <CaretDown size={12} />
-            </>
-          )}
-        </div>
       </div>
 
       {/* 내부 콘텐츠 스크롤 영역 */}

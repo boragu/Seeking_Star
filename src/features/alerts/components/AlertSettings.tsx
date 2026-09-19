@@ -19,7 +19,7 @@ export function AlertSettings({
 }: {
   destination: Destination | null;
   enabled: boolean;
-  setEnabled: (value: boolean) => void;
+  setEnabled: (value: boolean) => void | Promise<void>;
   timing: AlertTiming;
   setTiming: (value: AlertTiming) => void;
 }) {
@@ -77,7 +77,7 @@ export function AlertSettings({
         </div>
       </div>
       <p className="mt-5 text-[11px] leading-5 text-stone-500">
-        설정은 현재 기기에 저장되며, 알림 수신을 위해 브라우저 알림 권한 허용이 필요합니다.
+        설정은 변경 시 기기에 자동 저장되며, 알림 수신을 위해 브라우저 알림 권한 허용이 필요합니다.
       </p>
     </section>
   );

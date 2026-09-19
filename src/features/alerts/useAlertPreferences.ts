@@ -13,7 +13,7 @@ const TIMING_KEY = "stargazing-alert-timing";
 
 export type AlertTiming = "15" | "30" | "60";
 
-export function useAlertPreferences() {
+export function useAlertPreferences(destination?: Destination | null) {
   const [enabled, setEnabledState] = useState(() => localStorage.getItem(ENABLED_KEY) === "true");
   const [timing, setTimingState] = useState<AlertTiming>(() => {
     const saved = localStorage.getItem(TIMING_KEY);
@@ -23,18 +23,49 @@ export function useAlertPreferences() {
   const [testSent, setTestSent] = useState(false);
   const [permission, setPermission] = useState<NotificationPermissionState>(() => getNotificationPermission());
 
-  const setEnabled = (value: boolean) => {
-    setEnabledState(value);
-    setSaved(false);
-  };
+  const setEnabled = useCallback(
+    async (value: boolean, targetDest?: Destination | null) => {
+      setEnabledState(value);
+      localStorage.setItem(ENABLED_KEY, String(value));
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
 
-  const setTiming = (value: AlertTiming) => {
-    setTimingState(value);
-    setSaved(false);
-  };
+      const dest = targetDest !== undefined ? targetDest : destination;
+
+      if (value) {
+        let nextPermission = getNotificationPermission();
+        if (nextPermission === "default") {
+          nextPermission = await requestNotificationPermission();
+        }
+        setPermission(nextPermission);
+
+        if (nextPermission === "granted") {
+          const timingLabel = timing === "60" ? "1시간" : `${timing}분`;
+          const destName = dest ? dest.name : "선택한 별보기 장소";
+          await sendStargazingNotification(`🌟 [별보러간다] ${destName} 알림 등록 완료`, {
+            body: `출발 ${timingLabel} 전에 혼잡도 변화 및 별보기 예보를 보내드릴게요.`,
+            tag: "alert-registration",
+            url: "/alerts"
+          });
+        }
+      }
+    },
+    [destination, timing]
+  );
+
+  const setTiming = useCallback(
+    (value: AlertTiming) => {
+      setTimingState(value);
+      localStorage.setItem(TIMING_KEY, value);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    },
+    []
+  );
 
   const save = useCallback(
-    async (destination?: Destination | null) => {
+    async (targetDest?: Destination | null) => {
+      const dest = targetDest !== undefined ? targetDest : destination;
       let nextPermission = getNotificationPermission();
 
       if (enabled) {
@@ -45,7 +76,7 @@ export function useAlertPreferences() {
 
         if (nextPermission === "granted") {
           const timingLabel = timing === "60" ? "1시간" : `${timing}분`;
-          const destName = destination ? destination.name : "선택한 별보기 장소";
+          const destName = dest ? dest.name : "선택한 별보기 장소";
           await sendStargazingNotification(`🌟 [별보러간다] ${destName} 알림 등록 완료`, {
             body: `출발 ${timingLabel} 전에 혼잡도 변화 및 별보기 예보를 보내드릴게요.`,
             tag: "alert-registration",
@@ -57,21 +88,26 @@ export function useAlertPreferences() {
       localStorage.setItem(ENABLED_KEY, String(enabled));
       localStorage.setItem(TIMING_KEY, timing);
       setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     },
-    [enabled, timing]
+    [destination, enabled, timing]
   );
 
-  const triggerTestAlert = useCallback(async (destination?: Destination | null) => {
-    const timingLabel = timing === "60" ? "1시간" : `${timing}분`;
-    const destName = destination ? destination.name : undefined;
-    const ok = await sendTestNotification(destName, timingLabel);
-    setPermission(getNotificationPermission());
-    if (ok) {
-      setTestSent(true);
-      setTimeout(() => setTestSent(false), 4000);
-    }
-    return ok;
-  }, [timing]);
+  const triggerTestAlert = useCallback(
+    async (targetDest?: Destination | null) => {
+      const dest = targetDest !== undefined ? targetDest : destination;
+      const timingLabel = timing === "60" ? "1시간" : `${timing}분`;
+      const destName = dest ? dest.name : undefined;
+      const ok = await sendTestNotification(destName, timingLabel);
+      setPermission(getNotificationPermission());
+      if (ok) {
+        setTestSent(true);
+        setTimeout(() => setTestSent(false), 4000);
+      }
+      return ok;
+    },
+    [destination, timing]
+  );
 
   return {
     enabled,

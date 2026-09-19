@@ -8,7 +8,7 @@ import { useAlertPreferences } from "../features/alerts/useAlertPreferences";
 
 export function AlertsPage({ navigate }: { navigate: Navigate }) {
   const { destination } = useApp();
-  const preferences = useAlertPreferences();
+  const preferences = useAlertPreferences(destination);
   return (
     <AppPage path="/alerts" navigate={navigate}>
       <main id="main-content" className="mx-auto w-[min(1080px,calc(100%-64px))] py-10 max-md:w-[calc(100%-32px)] max-md:py-6">
