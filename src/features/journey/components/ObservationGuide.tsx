@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Camera, Compass, Moon, ShieldCheck, SlidersHorizontal } from "@phosphor-icons/react";
 import type { Destination, PlannerState, RouteEstimate } from "../../../domain/types";
 import { generateObservationGuide } from "../../ai/aiStargazingService";
+import { AiCameraGuideCard } from "../../ai/components/AiCameraGuideCard";
 
 type CameraDeviceType = "iphone" | "galaxy" | "general" | "mirrorless";
 
@@ -138,6 +139,11 @@ export function ObservationGuide({
             <p className="text-stone-700 font-medium">{currentPreset.opticalRuleNote}</p>
           </div>
         </div>
+      </div>
+
+      {/* AI 실시간 기기별 야간 천체 촬영 가이드 */}
+      <div className="mt-4">
+        <AiCameraGuideCard destination={destination} planner={planner} />
       </div>
 
       {/* 인원 및 이동수단 맞춤 안내 */}

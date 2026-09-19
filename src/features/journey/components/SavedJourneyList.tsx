@@ -1,5 +1,6 @@
 import { ArrowRight, CalendarBlank, Car, Clock, MapPin, Sparkle, Tent, Trash } from "@phosphor-icons/react";
 import { AiBadge } from "../../../components/ui/AiBadge";
+import { MarkdownText } from "../../../components/ui/MarkdownText";
 import { Button } from "../../../components/ui/Button";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import type { SavedJourneyItem } from "../../../domain/types";
@@ -121,9 +122,10 @@ export function SavedJourneyList({
                     <div className="mb-1 flex items-center justify-between">
                       <AiBadge label="AI 브리핑" variant="teal" />
                     </div>
-                    <p className="line-clamp-2 text-[11px] leading-relaxed text-ink">
-                      {item.aiBriefing}
-                    </p>
+                    <MarkdownText
+                      content={item.aiBriefing}
+                      className="line-clamp-2 text-[11px] leading-relaxed text-ink"
+                    />
                   </div>
                 )}
               </div>

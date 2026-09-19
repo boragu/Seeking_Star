@@ -4,6 +4,7 @@ import { AppPage } from "../components/layout/AppPage";
 import { PageHeading } from "../components/ui/PageHeading";
 import { AlertSettings } from "../features/alerts/components/AlertSettings";
 import { useAlertPreferences } from "../features/alerts/useAlertPreferences";
+import { AiAlertPreviewCard } from "../features/ai/components/AiAlertPreviewCard";
 
 export function AlertsPage({ navigate }: { navigate: Navigate }) {
   const { destination, planner } = useApp();
@@ -15,7 +16,7 @@ export function AlertsPage({ navigate }: { navigate: Navigate }) {
           title="출발 전 혼잡도 알림 설정"
           description="선택한 관측지의 혼잡도 변동 상황을 출발 전 기기 알림으로 안내합니다."
         />
-        <div className="mt-6">
+        <div className="mt-6 space-y-6">
           <AlertSettings
             destination={destination}
             enabled={preferences.enabled}
@@ -29,6 +30,9 @@ export function AlertsPage({ navigate }: { navigate: Navigate }) {
             save={() => preferences.save(destination)}
             triggerTestAlert={() => preferences.triggerTestAlert(destination, planner.departure)}
           />
+
+          {/* AI 맞춤 출발 알림 미리보기 */}
+          <AiAlertPreviewCard destination={destination} planner={planner} />
         </div>
       </main>
     </AppPage>

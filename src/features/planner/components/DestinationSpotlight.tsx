@@ -9,6 +9,7 @@ import { DestinationFacts } from "../../recommendations/components/DestinationFa
 import { DestinationMedia } from "../../recommendations/components/DestinationMedia";
 import { ScoreBreakdown } from "../../recommendations/components/ScoreBreakdown";
 import { AiJourneyBriefing } from "../../ai/components/AiJourneyBriefing";
+import { AiOvertourismBanner } from "../../ai/components/AiOvertourismBanner";
 import { CongestionForecast } from "../../recommendations/components/CongestionForecast";
 import { DestinationRankNavigator } from "../../recommendations/components/DestinationRankNavigator";
 
@@ -69,6 +70,11 @@ export function DestinationSpotlight({
         </div>
         <div className="mt-4">
           <DestinationFacts destination={destination} />
+        </div>
+
+        {/* 오버투어리즘 대체 추천 이유 (AI 분산 큐레이션) */}
+        <div className="mt-4">
+          <AiOvertourismBanner destination={destination} />
         </div>
 
         {/* 맞춤 여정 브리핑 (AI 실시간 분석 & 출발 타이밍 & 안심 포인트) */}

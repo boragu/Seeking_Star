@@ -348,3 +348,160 @@ export async function requestAiEnhancedGuide(
     return null;
   }
 }
+
+/**
+ * 1. AI 밤하늘 촬영 가이드 요청 (스마트폰 야간/프로 모드 vs 미러리스/DSLR 세팅)
+ */
+export async function requestAiAstrophotographyGuide(
+  destination: Destination,
+  planner: PlannerState,
+  deviceType: "smartphone" | "camera",
+  signal?: AbortSignal
+): Promise<string | null> {
+  try {
+    const moon = calculateMoonPhase(planner.date);
+    const astro = calculateAstronomicalConditions(planner.date);
+    const calmScore = destination.calm ?? 75;
+
+    const devicePrompt =
+      deviceType === "smartphone"
+        ? `[촬영 기기]: 스마트폰 (아이폰 야간 모드 / 갤럭시 Pro 모드)
+[요구사항]:
+1. 권장 촬영 모드 및 삼각대 거치 팁
+2. 최적 노출 시간(초), ISO 범위, 초점 고정(AF/MF) 팁
+3. 달빛 밝기(${moon.phaseName}, 광도율 ${moon.illumination}%)를 고려한 밤하늘/달 분리 촬영 꿀팁`
+        : `[촬영 기기]: 미러리스 / DSLR 카메라
+[요구사항]:
+1. 렌즈 조리개(F값), 셔터스피드(별 흐름 방지 500법칙 기준 초단위), ISO 감도, 화이트밸런스(K값)
+2. 무한대 수동 초점(MF) 및 라이브뷰 확대 맞춤법
+3. 달빛 간섭(${moon.interferenceLabel})을 최소화하는 구도 및 노출 브라케팅 팁`;
+
+    const prompt = `[천문 및 환경 데이터]
+- 관측지: ${destination.name} (${destination.region})
+- 관측 일자: ${planner.date} (${planner.time} 기준)
+- 월령 위상: ${moon.phaseIcon} ${moon.phaseName} (월령 ${moon.age}일, 광도 ${moon.illumination}%, 간섭도 ${moon.interferenceLabel})
+- 천문학적 박명/골든타임: ${astro.optimalTimeWindow} (${astro.astronomicalTwilight})
+- 주요 관측 대상/방향: ${astro.targetConstellations}, 은하수 방향: ${astro.milkyWayDirection}
+- 주변 광공해 차단 수준: 한적도 ${calmScore}점 기반 청정 고지대
+
+${devicePrompt}
+
+[작성 지침]
+당신은 천체사진 전문가입니다. 위의 실시간 천문 조건(월령, 골든타임, 광공해)을 정확히 반영하여, 초보자도 현장에서 바로 따라 할 수 있는 구체적인 수치(ISO, 셔터스피드 등)와 핵심 촬영 팁을 3~4개의 명확하고 정갈한 불릿 포인트(• 기호)로 작성해 주세요. 불필요한 서론이나 인사말은 생략하고 바로 본론만 작성하세요.`;
+
+    const res = await fetch("/api/ai/guide", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal,
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "system",
+            content: "당신은 천체사진 및 스마트폰/미러리스 야간 촬영 전문 테크니컬 가이드입니다. 실시간 천문 조건에 맞는 정밀 세팅값을 제공합니다.",
+          },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.content?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 2. 오버투어리즘 대체 스토리텔링 ("왜 유명 과밀지 대신 이곳인가?")
+ */
+export async function requestAiOvertourismStory(
+  destination: Destination,
+  signal?: AbortSignal
+): Promise<string | null> {
+  try {
+    const calmScore = destination.calm ?? (destination.concentrationRate !== null ? Math.round(100 - destination.concentrationRate) : 75);
+    const campgroundsCount = destination.nearbyCampgrounds?.length ?? 0;
+    const relatedCount = destination.relatedPlaces?.length ?? 0;
+
+    const prompt = `[관측지 데이터]
+- 관측지명: ${destination.name} (${destination.address || destination.region})
+- 공공데이터 한적도: ${calmScore}점 / 100점 (높을수록 붐비지 않고 여유로움)
+- 반경 20km 내 등록 야영장: ${campgroundsCount}곳
+- 인근 연계 관광지: ${relatedCount}곳
+
+[작성 지침]
+당신은 지속 가능한 여행과 과밀 분산을 연구하는 여행 에디터입니다.
+양평 두물머리, 강릉 안반데기 같은 대표적인 야간 과밀 명소의 극심한 산간 병목과 소음 스트레스와 대비하여,
+'${destination.name}'이 여행자에게 선사하는 '고요한 밤하늘의 쉼과 여유로운 접근성'을 한눈에 와닿게 1~2문장의 감성적이면서도 담백한 문구로 작성하세요. (마크다운 기호 없이 순수 텍스트만 출력)`;
+
+    const res = await fetch("/api/ai/guide", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal,
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "system",
+            content: "당신은 오버투어리즘 문제를 해결하고 숨은 청정 여행지의 가치를 발굴하는 여행 에디터입니다.",
+          },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.content?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 3. 감성적인 AI 맞춤 출발 알림 카피 생성
+ */
+export async function requestAiAlertMessage(
+  destination: Destination,
+  planner: PlannerState,
+  signal?: AbortSignal
+): Promise<string | null> {
+  try {
+    const moon = calculateMoonPhase(planner.date);
+    const astro = calculateAstronomicalConditions(planner.date);
+    const travelMins = destination.travelMinutesEstimate ?? 60;
+
+    const prompt = `[출발 조건 및 천문 골든타임 데이터]
+- 출발지: ${planner.departure}
+- 목적지: ${destination.name} (소요시간: 편도 약 ${travelMins}분)
+- 관측 일자: ${planner.date}
+- 최적 관측 골든타임: ${astro.optimalTimeWindow}
+- 월령 상태: ${moon.phaseName} (달빛 간섭: ${moon.interferenceLabel})
+- 동행 인원: ${planner.people || 2}인
+
+[작성 지침]
+여행자에게 전송할 감성적이면서도 실용적인 스마트폰 푸시 알림 문구를 작성하세요.
+- 출발 권장 시각, 목적지의 밤하늘 특징(월령/골든타임), 필수 준비물(방한 외투 등)을 포함해 1~2문장의 정중하고 설레는 문체로 작성하세요. (특수 마크다운 없이 텍스트만 출력)`;
+
+    const res = await fetch("/api/ai/guide", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal,
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "system",
+            content: "당신은 밤하늘 여행자를 위한 실시간 스마트 천문 알리미입니다.",
+          },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.content?.trim() || null;
+  } catch {
+    return null;
+  }
+}

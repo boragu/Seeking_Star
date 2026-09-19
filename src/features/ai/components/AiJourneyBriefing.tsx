@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowClockwise, CheckCircle, Clock, Sparkle, UserCheck, WarningCircle } from "@phosphor-icons/react";
 import { AiBadge } from "../../../components/ui/AiBadge";
+import { MarkdownText } from "../../../components/ui/MarkdownText";
 import type { Destination, PlannerState } from "../../../domain/types";
 import { generateAiJourneyBriefing, requestAiEnhancedGuide } from "../aiStargazingService";
 import {
@@ -132,9 +133,10 @@ export function AiJourneyBriefing({
             </button>
           </div>
         ) : (
-          <p className="text-[12px] leading-relaxed font-normal text-ink whitespace-pre-line">
-            {llmText}
-          </p>
+          <MarkdownText
+            content={llmText || ""}
+            className="text-[12px] font-normal leading-relaxed text-ink"
+          />
         )}
       </div>
 
