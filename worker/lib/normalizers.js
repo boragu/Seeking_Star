@@ -120,11 +120,18 @@ export function normalizeRelatedItem(item) {
   const point = coordinates(item);
   const name = firstValue(item, ["rlteTatsNm", "tAtsNm", "title", "name"]);
   if (!name) return null;
+  const region = compactAddress(
+    firstValue(item, ["rlteRegnNm", "areaNm", "doNm"]),
+    firstValue(item, ["rlteSignguNm", "signguNm", "sigunguNm"])
+  );
+  const address = compactAddress(firstValue(item, ["addr1"]), firstValue(item, ["addr2"]));
+
   return {
     id: String(firstValue(item, ["rlteTatsId", "tAtsId", "contentId", "contentid"]) ?? name),
     name: String(name).trim(),
     category: firstValue(item, ["rlteCtgryLclsNm", "rlteCtgryMclsNm", "category"]),
-    address: compactAddress(firstValue(item, ["addr1"]), firstValue(item, ["addr2"])),
+    address: address || region || "",
+    region: region || address || "",
     latitude: point.latitude,
     longitude: point.longitude,
     rank: toNumber(firstValue(item, ["rlteRank", "rank", "rnum"])),
@@ -225,13 +232,7 @@ export function buildLiveDestinations({ tourismItems, concentrationItems, campin
       .filter((campground) => campground.distanceKm !== null && campground.distanceKm <= 20)
       .sort((a, b) => a.distanceKm - b.distanceKm)
       .slice(0, 5);
-    const nearbyRelated = uniqueRelated
-      .map((related) => ({ ...related, distanceKm: distanceKm(destination, related) }))
-      .filter((related) => related.distanceKm === null || related.distanceKm <= 40)
-      .sort((a, b) => (a.distanceKm ?? Number.MAX_SAFE_INTEGER) - (b.distanceKm ?? Number.MAX_SAFE_INTEGER))
-      .slice(0, 5);
-
-    // 시군구별 평균 집중률 fallback 계산
+    // 시군구별 평균 집중률 fallback 계산 및 시군구 키 수집
     const signguAvgMap = new Map();
     for (const item of normalizedConcentration) {
       if (!item.signguNm || item.concentrationRate === null) continue;
@@ -242,27 +243,78 @@ export function buildLiveDestinations({ tourismItems, concentrationItems, campin
       signguAvgMap.set(key, current);
     }
 
-    const regionMatch = (destination.address || destination.region || "").replace(/\s+/g, "");
+    const destRegionClean = (destination.address || destination.region || "").replace(/\s+/g, "");
     let regionalAvgRate = null;
+    let matchedSigngu = null;
     for (const [signguName, data] of signguAvgMap.entries()) {
-      if (regionMatch.includes(signguName)) {
+      if (destRegionClean.includes(signguName)) {
         regionalAvgRate = Math.round(data.sum / data.count);
+        matchedSigngu = signguName;
         break;
       }
     }
 
     const effectiveConcentration = concentration?.concentrationRate ?? regionalAvgRate ?? (destination.name.includes("안반데기") || destination.name.includes("육백마지기") ? 82 : 32);
 
-    // 연관 관광지: TarRlteTarService1이 0건일 경우 반경 30km 내 주변 타 관광지로 보강
-    let effectiveNearbyRelated = nearbyRelated;
-    if (effectiveNearbyRelated.length === 0) {
-      effectiveNearbyRelated = uniqueTourism
+    // uniqueTourism 및 uniqueCamping을 참조하여 좌표/주소 매핑 보강
+    const tourismLookup = new Map(uniqueTourism.map((t) => [t.name.replace(/\s+/g, ""), t]));
+    const campingLookup = new Map(uniqueCamping.map((c) => [c.name.replace(/\s+/g, ""), c]));
+
+    const enrichedRelated = uniqueRelated.map((related) => {
+      const cleanName = related.name.replace(/\s+/g, "");
+      const matchedTourism = tourismLookup.get(cleanName);
+      const matchedCamping = campingLookup.get(cleanName);
+      const matched = matchedTourism || matchedCamping;
+
+      const lat = related.latitude ?? matched?.latitude ?? null;
+      const lon = related.longitude ?? matched?.longitude ?? null;
+      const addr = matched?.address || related.address || related.region || destination.address || destination.region || "";
+      const reg = related.region || matched?.region || destination.region || "";
+      const dist = (lat !== null && lon !== null) ? distanceKm(destination, { latitude: lat, longitude: lon }) : null;
+
+      return {
+        ...related,
+        latitude: lat,
+        longitude: lon,
+        address: addr,
+        region: reg,
+        distanceKm: dist,
+      };
+    });
+
+    let nearbyRelated = enrichedRelated
+      .filter((related) => {
+        if (related.distanceKm !== null && related.distanceKm <= 50) return true;
+        const relRegionClean = (related.region || related.address || "").replace(/\s+/g, "");
+        if (matchedSigngu && relRegionClean.includes(matchedSigngu)) return true;
+        if (destRegionClean && relRegionClean && (destRegionClean.includes(relRegionClean) || relRegionClean.includes(destRegionClean))) return true;
+        return false;
+      })
+      .sort((a, b) => {
+        if (a.rank !== null && b.rank !== null && a.rank !== b.rank) {
+          return a.rank - b.rank;
+        }
+        return (a.distanceKm ?? 999) - (b.distanceKm ?? 999);
+      })
+      .slice(0, 5);
+
+    // 연관 관광지: 지역 필터 매칭이 0건일 경우 전체 연관 관광지 중 rank 상위 또는 반경 35km 내 주변 관광지로 보강
+    if (nearbyRelated.length === 0) {
+      nearbyRelated = enrichedRelated
+        .filter((r) => r.distanceKm === null || r.distanceKm <= 40)
+        .sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99))
+        .slice(0, 5);
+    }
+
+    if (nearbyRelated.length === 0) {
+      nearbyRelated = uniqueTourism
         .filter((other) => other.id !== destination.id)
         .map((other) => ({
           id: other.id,
           name: other.name,
           category: other.cat2 || other.cat1 || "주변 관광명소",
-          address: other.address,
+          address: other.address || destination.address || destination.region || "",
+          region: other.region || destination.region || "",
           latitude: other.latitude,
           longitude: other.longitude,
           distanceKm: distanceKm(destination, other),
@@ -290,7 +342,7 @@ export function buildLiveDestinations({ tourismItems, concentrationItems, campin
       travelMinutesEstimate: directDistanceKm === null ? null : Math.max(15, Math.round((directDistanceKm / 62) * 60)),
       travelEstimateMethod: directDistanceKm === null ? null : "직선거리 기반 참고 추정",
       nearbyCampgrounds,
-      relatedPlaces: effectiveNearbyRelated,
+      relatedPlaces: nearbyRelated,
       accessible: isAccessible,
       cloud: baseSkyCloud,
       parkingMinutes: estParkingMins,
