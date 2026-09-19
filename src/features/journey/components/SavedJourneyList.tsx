@@ -1,4 +1,5 @@
 import { ArrowRight, CalendarBlank, Car, Clock, MapPin, Sparkle, Tent, Trash } from "@phosphor-icons/react";
+import { AiBadge } from "../../../components/ui/AiBadge";
 import { Button } from "../../../components/ui/Button";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import type { SavedJourneyItem } from "../../../domain/types";
@@ -113,6 +114,18 @@ export function SavedJourneyList({
                     <span>캠핑장 {item.campgroundCount}곳 연계</span>
                   </div>
                 </div>
+
+                {/* AI 브리핑 요약 미리보기 */}
+                {item.aiBriefing && (
+                  <div className="mt-3 rounded border border-line/60 bg-paper/60 p-2.5">
+                    <div className="mb-1 flex items-center justify-between">
+                      <AiBadge label="AI 브리핑" variant="teal" />
+                    </div>
+                    <p className="line-clamp-2 text-[11px] leading-relaxed text-ink">
+                      {item.aiBriefing}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* 하단 액션 버튼 */}

@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import type { Destination, PlannerState, SavedJourneyItem } from "../../domain/types";
+import { getCachedAiBriefing } from "../ai/aiBriefingCache";
 
 const SELECTED_KEY = "stargazing-selected-id";
 const SAVED_JOURNEYS_KEY = "stargazing-saved-journeys";
@@ -67,6 +68,7 @@ export function useJourneySelection() {
       savedAt: new Date().toISOString(),
       destination,
       planner,
+      aiBriefing: getCachedAiBriefing(destination, planner),
     };
     const next = [newItem, ...savedJourneys.filter((j) => j.destinationId !== destination.id)];
     persistJourneys(next);

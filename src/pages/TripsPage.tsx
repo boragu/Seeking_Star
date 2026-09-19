@@ -11,6 +11,7 @@ import { JourneyTimeline, type TimelineStop } from "../features/journey/componen
 import { NearbyPlaceList } from "../features/journey/components/NearbyPlaceList";
 import { ObservationGuide } from "../features/journey/components/ObservationGuide";
 import { SavedJourneyList } from "../features/journey/components/SavedJourneyList";
+import { AiJourneyBriefing } from "../features/ai/components/AiJourneyBriefing";
 import { useShareJourney } from "../features/journey/useShareJourney";
 import { addMinutesToTime, formatDateInputKorean } from "../lib/currentContext";
 
@@ -230,6 +231,9 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
                     description={`${formatDateInputKorean(planner.date)} 일정 · ${planner.departure} 출발 이동 경로, 인근 캠핑장 및 연관 관광지`}
                   />
                 </div>
+
+                {/* AI 맞춤 여정 브리핑 (캐시 연동) */}
+                <AiJourneyBriefing destination={destination} planner={planner} />
 
                 {/* 코스 모드 선택 탭 (직행 vs 연계 관광지 경유 vs 캠핑장 체류) */}
                 <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-white/40 p-3">

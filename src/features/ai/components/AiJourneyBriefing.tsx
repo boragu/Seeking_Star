@@ -3,6 +3,11 @@ import { ArrowClockwise, CheckCircle, Clock, Sparkle, UserCheck, WarningCircle }
 import { AiBadge } from "../../../components/ui/AiBadge";
 import type { Destination, PlannerState } from "../../../domain/types";
 import { generateAiJourneyBriefing, requestAiEnhancedGuide } from "../aiStargazingService";
+import {
+  getCachedAiBriefing,
+  setCachedAiBriefing,
+  invalidateCachedAiBriefing,
+} from "../aiBriefingCache";
 
 export function AiJourneyBriefing({
   destination,
@@ -23,6 +28,16 @@ export function AiJourneyBriefing({
     let isMounted = true;
     const controller = new AbortController();
 
+    // 1. 로컬 캐시 우선 확인
+    const cached = getCachedAiBriefing(destination, planner);
+    if (cached) {
+      setLlmText(cached);
+      setIsLoading(false);
+      setHasError(false);
+      return;
+    }
+
+    // 2. 캐시 없으면 실시간 AI 호출
     setIsLoading(true);
     setHasError(false);
     setLlmText(null);
@@ -32,6 +47,7 @@ export function AiJourneyBriefing({
         if (!isMounted) return;
         if (content) {
           setLlmText(content);
+          setCachedAiBriefing(destination, planner, content);
           setHasError(false);
         } else {
           setHasError(true);
@@ -51,6 +67,7 @@ export function AiJourneyBriefing({
   }, [destination.id, planner.departure, planner.date, planner.people, planner.transport, planner.accessibility, refreshKey]);
 
   const handleRefresh = () => {
+    invalidateCachedAiBriefing(destination, planner);
     setLlmText(null);
     setHasError(false);
     setRefreshKey((k) => k + 1);

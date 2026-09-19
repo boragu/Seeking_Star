@@ -89,4 +89,5 @@ export interface SavedJourneyItem {
   savedAt: string;
   destination?: Destination;
   planner?: PlannerState;
+  aiBriefing?: string | null;
 }
