@@ -305,21 +305,26 @@ export async function requestAiEnhancedGuide(
     const calmScore = destination.calm ?? (destination.concentrationRate !== null ? Math.round(100 - destination.concentrationRate) : 75);
     const travelMins = destination.travelMinutesEstimate ?? 60;
     const campgroundsCount = destination.nearbyCampgrounds?.length ?? 0;
+    const relatedCount = destination.relatedPlaces?.length ?? 0;
+    const relatedNames = destination.relatedPlaces?.slice(0, 2).map((r) => r.name).join(", ");
+    const moon = calculateMoonPhase(planner.date);
 
-    const prompt = `[여행자 및 관측 조건]
+    const prompt = `[여행자 및 천문/관광 공공데이터 컨텍스트]
 - 출발지: ${planner.departure}
 - 목적지: ${destination.name} (${destination.address || destination.region || "위치 정보"})
-- 여행 일자 및 시간: ${planner.date} ${planner.time}
+- 여행 일자: ${planner.date} (${planner.time} 출발 예정)
 - 동행 인원: ${planner.people || 2}명, 이동 수단: ${planner.transport === "rental" ? "렌터카" : "자가용"}
-- 무장애/배려 여행 필요: ${planner.accessibility ? "예 (완만 동선 및 편의시설 필요)" : "아니오"}
-- 공공데이터 한적도: ${calmScore}점 (100점 만점, 높을수록 한적함)
-- 예상 편도 소요시간: 약 ${travelMins}분
-- 인근 20km 내 등록 야영장: ${campgroundsCount}곳
+- 무장애/배려 여행 옵션: ${planner.accessibility ? "적용됨 (완만한 진입로 및 편의시설 필요)" : "미적용"}
+- 천문 월령 상태: ${moon.phaseName} (월령 ${moon.age}일, 광도율 ${moon.illumination}%, 달빛 간섭 ${moon.interferenceLabel})
+- 공공데이터 한적도: ${calmScore}점 / 100점 (대표 과밀 명소 대비 여유도)
+- 예상 이동 소요시간: 편도 약 ${travelMins}분
+- 인근 정식 등록 야영장: 반경 20km 내 ${campgroundsCount}곳 (합법 체류 인프라)
+- 인근 연계 관광지: ${relatedCount}곳${relatedNames ? ` (예: ${relatedNames})` : ""}
 
-[작성 규칙]
-1. 인위적인 AI 말투('초개인화', 'AI로서', '환상적인 밤하늘을 선물합니다' 등 과장된 홍보성 문구)는 완전히 배제하세요.
-2. 현지 도로/혼잡 상황, 출발 타이밍, 고지대 안전 수칙을 실질적이고 담백하게 2~3문장으로 조언하세요.
-3. 마크다운 기호 없이 깔끔하고 자연스러운 한국어 문장으로 작성하세요.`;
+[작성 지침]
+당신은 한국관광공사 관광빅데이터와 천문 역학 데이터를 결합해 여행자에게 실질적인 도움을 주는 전문 여행 컨설턴트입니다.
+위의 출발지, 소요시간, 월령(달빛 여건), 한적도, 야영/연계지 데이터를 모두 자연스럽게 종합하여, 여행자가 현장에서 즉시 참고할 수 있는 담백하고 신뢰감 있는 맞춤 브리핑을 2~3문장으로 작성하세요.
+(기계적인 AI 말투나 과장된 홍보성 문구는 배제하고, 마크다운 기호 없이 자연스러운 한국어 문단으로 작성하세요.)`;
 
     const res = await fetch("/api/ai/guide", {
       method: "POST",
@@ -329,7 +334,7 @@ export async function requestAiEnhancedGuide(
         messages: [
           {
             role: "system",
-            content: "당신은 한국관광공사 관광 빅데이터 기반의 밤하늘 관측 및 과밀 분산 여행 가이드입니다. 담백하고 정확한 조언을 제공합니다.",
+            content: "당신은 한국관광공사 관광 빅데이터 및 천문 관측 데이터를 분석하여 과밀 분산과 안전한 밤하늘 여정을 안내하는 전문 여행 가이드입니다.",
           },
           { role: "user", content: prompt },
         ],

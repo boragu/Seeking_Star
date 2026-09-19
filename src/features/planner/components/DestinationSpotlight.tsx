@@ -7,7 +7,6 @@ import type { RankedDestination } from "../../../lib/recommendationEngine";
 import { DestinationAlternatives } from "../../recommendations/components/DestinationAlternatives";
 import { DestinationFacts } from "../../recommendations/components/DestinationFacts";
 import { DestinationMedia } from "../../recommendations/components/DestinationMedia";
-import { RecommendationReason } from "../../recommendations/components/RecommendationReason";
 import { ScoreBreakdown } from "../../recommendations/components/ScoreBreakdown";
 import { AiJourneyBriefing } from "../../ai/components/AiJourneyBriefing";
 import { CongestionForecast } from "../../recommendations/components/CongestionForecast";
@@ -35,18 +34,16 @@ export function DestinationSpotlight({
     : `${rankIndex + 1}순위 (추천 보류)`;
 
   return (
-    <section className="space-y-4">
-      {/* 상단 랭킹 빠른 전환 네비게이터 & 목록 복귀 바 */}
-      {onBackToList && (
+    <section className="space-y-6">
+      <div className="border border-line bg-white/52 p-6 shadow-[0_20px_60px_rgba(68,49,29,.07)] max-md:p-4">
+        {/* 상단 순위 칩 내비게이터 (1위~5위 즉시 전환) */}
         <DestinationRankNavigator
           items={items}
           selectedId={destination.id}
           onSelect={onSelect}
           onBackToList={onBackToList}
         />
-      )}
 
-      <div className="border border-line bg-white/52 p-6 shadow-[0_20px_60px_rgba(68,49,29,.07)] max-md:p-4">
         <SectionHeading
           number={String(rankIndex + 1).padStart(2, "0")}
           title={rankLabel}
@@ -74,14 +71,9 @@ export function DestinationSpotlight({
           <DestinationFacts destination={destination} />
         </div>
 
-        {/* 맞춤 여정 브리핑 */}
+        {/* 맞춤 여정 브리핑 (AI 실시간 분석 & 출발 타이밍 & 안심 포인트) */}
         <div className="mt-4">
           <AiJourneyBriefing destination={destination} planner={planner} />
-        </div>
-        
-        {/* 분산 및 추천 사유 분석 */}
-        <div className="mt-4">
-          <RecommendationReason destination={destination} planner={planner} rankIndex={rankIndex} />
         </div>
 
         {/* 시간대별 혼잡도 및 산간 병목 예측 차트 */}

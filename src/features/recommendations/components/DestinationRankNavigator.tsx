@@ -12,7 +12,7 @@ export function DestinationRankNavigator({
   items: RankedDestination[];
   selectedId: string;
   onSelect: (id: string) => void;
-  onBackToList: () => void;
+  onBackToList?: () => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentIndex = items.findIndex((item) => item.id === selectedId);
