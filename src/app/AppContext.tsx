@@ -5,16 +5,15 @@ import type { Destination, PlannerState, SavedJourneyItem } from "../domain/type
 import { useJourneySelection } from "../features/journey/useJourneySelection";
 import { useDeviceLocation } from "../features/location/useDeviceLocation";
 import { useRecommendations } from "../features/recommendations/useRecommendations";
-import { rankDestinations } from "../lib/recommendationEngine";
+import { rankDestinations, scoreDestination, type RankedDestination } from "../lib/recommendationEngine";
 import { useRoute } from "./navigation";
 
 export type AppContextType = ReturnType<typeof useAppModel>;
 
 const AppContext = createContext<AppContextType | null>(null);
 
-function savedItemToDestination(item: SavedJourneyItem): Destination {
-  if (item.destination) return item.destination;
-  return {
+function savedItemToDestination(item: SavedJourneyItem, planner: PlannerState): RankedDestination {
+  const dest: Destination = item.destination ?? {
     id: item.destinationId,
     name: item.destinationName,
     address: item.destinationAddress,
@@ -40,6 +39,11 @@ function savedItemToDestination(item: SavedJourneyItem): Destination {
     parkingMinutes: null,
     observingWindow: null,
   };
+
+  return {
+    ...dest,
+    analysis: scoreDestination(dest, planner),
+  };
 }
 
 function useAppModel(path: string) {
@@ -55,14 +59,14 @@ function useAppModel(path: string) {
       const fromRanked = ranked.find((item) => item.id === selectedId);
       if (fromRanked) return fromRanked;
       const fromSaved = journey.savedJourneys.find((item) => item.destinationId === selectedId);
-      if (fromSaved) return savedItemToDestination(fromSaved);
+      if (fromSaved) return savedItemToDestination(fromSaved, planner);
     }
     if (ranked.length > 0) return ranked[0];
     if (journey.savedJourneys.length > 0) {
-      return savedItemToDestination(journey.savedJourneys[0]);
+      return savedItemToDestination(journey.savedJourneys[0], planner);
     }
     return null;
-  }, [ranked, selectedId, journey.savedJourneys]);
+  }, [ranked, selectedId, journey.savedJourneys, planner]);
 
   const route = useMemo(() => createRouteEstimate(destination), [destination]);
 

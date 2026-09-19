@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, BellRinging, BookmarkSimple, FolderStar, ListChe
 import type { Navigate } from "../app/navigation";
 import { useApp } from "../app/AppContext";
 import { AppPage } from "../components/layout/AppPage";
+import { JourneyStepper } from "../components/layout/JourneyStepper";
 import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
 import { PageHeading } from "../components/ui/PageHeading";
@@ -17,6 +18,7 @@ import { addMinutesToTime, formatDateInputKorean } from "../lib/currentContext";
 export function TripsPage({ navigate }: { navigate: Navigate }) {
   const {
     planner,
+    setPlanner,
     destination,
     route,
     journey: {
@@ -83,7 +85,7 @@ export function TripsPage({ navigate }: { navigate: Navigate }) {
     <AppPage path="/trips" navigate={navigate}>
       <main
         id="main-content"
-        className="mx-auto w-[min(1160px,calc(100%-64px))] py-8 max-md:w-[calc(100%-32px))] max-md:pt-6 max-md:pb-24"
+        className="mx-auto w-[min(1160px,calc(100%-64px))] py-8 max-md:w-[calc(100%-32px)] max-md:pt-6 max-md:pb-24"
       >
         <JourneyStepper current={3} />
 
