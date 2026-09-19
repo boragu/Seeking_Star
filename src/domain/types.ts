@@ -61,3 +61,21 @@ export interface RouteEstimate {
   distance: string;
   note: string;
 }
+
+export interface SavedJourneyItem {
+  id: string;
+  destinationId: string;
+  destinationName: string;
+  destinationAddress: string;
+  destinationRegion: string;
+  imageUrl: string | null;
+  calm: number | null;
+  distanceKm: number | null;
+  travelMinutesEstimate: number | null;
+  date: string;
+  departureTime: string;
+  departureName: string;
+  campgroundCount: number;
+  relatedCount: number;
+  savedAt: string;
+}
