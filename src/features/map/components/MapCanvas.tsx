@@ -36,7 +36,7 @@ export function MapCanvas({
       </div>
       {destination.latitude !== null && (
         <a
-          className="absolute bottom-4 right-4 flex min-h-11 items-center gap-2 bg-ink px-4 text-[11px] font-bold text-cream shadow-xl transition hover:bg-ink-soft"
+          className="absolute bottom-4 right-4 flex min-h-9 items-center gap-2 bg-ink/90 backdrop-blur px-3 text-[11px] font-bold text-cream shadow-xl transition hover:bg-ink-soft max-md:bottom-auto max-md:top-4 max-md:right-4 border border-cream/20"
           href={`https://www.openstreetmap.org/?mlat=${destination.latitude}&mlon=${destination.longitude}#map=14/${destination.latitude}/${destination.longitude}`}
           target="_blank"
           rel="noreferrer"

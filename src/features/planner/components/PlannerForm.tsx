@@ -4,7 +4,7 @@ import { Field, FieldFrame } from "../../../components/ui/Field";
 import { SectionHeading } from "../../../components/ui/SectionHeading";
 import type { PlannerState } from "../../../domain/types";
 import type { LocationFeedback } from "../../location/useDeviceLocation";
-import { getCurrentDateTime } from "../../../lib/currentContext";
+import { findHubCoordinates, getCurrentDateTime } from "../../../lib/currentContext";
 import { cn } from "../../../lib/cn";
 
 export function PlannerForm({
@@ -24,15 +24,17 @@ export function PlannerForm({
 }) {
   const update = <K extends keyof PlannerState,>(key: K, value: PlannerState[K]) =>
     setPlanner((state) => ({ ...state, [key]: value }));
-  const updateDeparture = (departure: string) =>
+  const updateDeparture = (departure: string) => {
+    const hub = findHubCoordinates(departure);
     setPlanner((state) => ({
       ...state,
       departure,
-      latitude: null,
-      longitude: null,
+      latitude: hub ? hub.latitude : (state.latitude ?? 37.5559),
+      longitude: hub ? hub.longitude : (state.longitude ?? 126.9723),
       locationAccuracy: null,
       locationSource: "manual",
     }));
+  };
   const useCurrentTime = () => setPlanner((state) => ({ ...state, ...getCurrentDateTime() }));
   const locationProblem = ["denied", "error", "unsupported"].includes(locationFeedback.status);
 
