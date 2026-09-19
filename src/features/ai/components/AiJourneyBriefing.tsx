@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowClockwise, CheckCircle, Clock, Sparkle, UserCheck, WarningCircle } from "@phosphor-icons/react";
 import { AiBadge } from "../../../components/ui/AiBadge";
 import { MarkdownText } from "../../../components/ui/MarkdownText";
+import { Skeleton } from "../../../components/ui/Skeleton";
 import type { Destination, PlannerState } from "../../../domain/types";
 import { generateAiJourneyBriefing, requestAiEnhancedGuide } from "../aiStargazingService";
 import {
@@ -107,15 +108,15 @@ export function AiJourneyBriefing({
       {/* 브리핑 본문: vLLM AI 실시간 생성 내용 (먹색 텍스트 & 편안한 행간) */}
       <div className="mt-3 min-h-[44px]">
         {isLoading ? (
-          <div className="space-y-2 py-1">
-            <div className="flex items-center gap-2 text-[11px] text-stone-600 animate-pulse">
+          <div className="space-y-2.5 py-1">
+            <div className="flex items-center gap-2 text-[11px] text-teal font-medium">
               <Sparkle size={14} className="text-teal animate-spin" />
-              <span>AI 모델이 맞춤 브리핑을 작성하고 있습니다...</span>
+              <span>AI 모델이 맞춤 여정 브리핑을 작성하고 있습니다…</span>
             </div>
-            <div className="space-y-1.5 animate-pulse">
-              <div className="h-3 w-4/5 rounded bg-line/60" />
-              <div className="h-3 w-full rounded bg-line/40" />
-              <div className="h-3 w-2/3 rounded bg-line/40" />
+            <div className="space-y-1.5">
+              <Skeleton className="h-3.5 w-full rounded" />
+              <Skeleton className="h-3.5 w-[92%] rounded" />
+              <Skeleton className="h-3.5 w-[75%] rounded" />
             </div>
           </div>
         ) : hasError ? (

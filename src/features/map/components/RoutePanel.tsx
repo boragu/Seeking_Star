@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight, Car, Crosshair, MapPin, NavigationArrow, Tent, T
 import type { Navigate } from "../../../app/navigation";
 import { Button } from "../../../components/ui/Button";
 import { Metric } from "../../../components/ui/Metric";
+import { Skeleton } from "../../../components/ui/Skeleton";
 import type { Destination, PlannerState, RouteEstimate } from "../../../domain/types";
 import { addMinutesToTime } from "../../../lib/currentContext";
 
@@ -22,6 +23,7 @@ export function RoutePanel({
   requestCurrentLocation?: () => void;
   locationFeedback?: { status: string; message: string };
 }) {
+  const isLocating = locationFeedback?.status === "loading";
   const arrival = route ? addMinutesToTime(planner.time, route.durationMinutes) : null;
 
   return (
@@ -51,11 +53,12 @@ export function RoutePanel({
           <button
             type="button"
             onClick={requestCurrentLocation}
-            className="mt-2 shrink-0 flex items-center gap-1 rounded-full border border-cream/20 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-cream/80 hover:bg-white/10 hover:text-gold-light transition"
+            disabled={isLocating}
+            className="mt-2 shrink-0 flex items-center gap-1 rounded-full border border-cream/20 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-cream/80 hover:bg-white/10 hover:text-gold-light transition cursor-pointer disabled:opacity-50"
             title="현재 내 위치로 재계산"
           >
-            <Crosshair size={14} className={locationFeedback?.status === "loading" ? "animate-spin text-teal" : ""} />
-            <span>내 위치</span>
+            <Crosshair size={14} className={isLocating ? "animate-spin text-teal" : ""} />
+            <span>{isLocating ? "위치 확인 중…" : "내 위치"}</span>
           </button>
         )}
       </div>
@@ -75,7 +78,16 @@ export function RoutePanel({
           )}
         </div>
 
-        {route ? (
+        {isLocating ? (
+          <div className="space-y-2 py-1">
+            <div className="flex items-center justify-between">
+              <Skeleton variant="night" className="h-8 w-32 rounded" />
+              <Skeleton variant="night" className="h-4 w-24 rounded" />
+            </div>
+            <Skeleton variant="night" className="h-4 w-28 rounded" />
+            <Skeleton variant="night" className="h-3 w-48 rounded" />
+          </div>
+        ) : route ? (
           <>
             <div className="flex items-end justify-between gap-4">
               <strong className="font-display text-[28px] text-cream md:text-[30px]">{route.duration}</strong>

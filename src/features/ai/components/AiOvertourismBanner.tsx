@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { TreeEvergreen } from "@phosphor-icons/react";
 import { AiBadge } from "../../../components/ui/AiBadge";
 import { MarkdownText } from "../../../components/ui/MarkdownText";
+import { Skeleton } from "../../../components/ui/Skeleton";
 import type { Destination } from "../../../domain/types";
 import { requestAiOvertourismStory } from "../aiStargazingService";
 import {
@@ -53,13 +54,16 @@ export function AiOvertourismBanner({
 
   return (
     <div className="rounded-lg border border-teal/30 bg-teal/[0.04] p-3 text-[11.5px] leading-relaxed">
-      <div className="flex items-center gap-1.5 font-bold text-teal mb-1">
+      <div className="flex items-center gap-1.5 font-bold text-teal mb-1.5">
         <TreeEvergreen size={15} weight="fill" />
         <span>과밀 명소 대신 이곳을 추천하는 이유</span>
         <AiBadge label="AI 큐레이션" variant="teal" />
       </div>
       {isLoading ? (
-        <div className="h-3 w-4/5 rounded bg-teal/10 animate-pulse mt-1" />
+        <div className="space-y-1.5 py-0.5">
+          <Skeleton className="h-3.5 w-full rounded" />
+          <Skeleton className="h-3.5 w-4/5 rounded" />
+        </div>
       ) : (
         <MarkdownText
           content={storyText || ""}

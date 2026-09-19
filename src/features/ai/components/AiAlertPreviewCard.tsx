@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BellRinging, Sparkle, WarningCircle } from "@phosphor-icons/react";
 import { AiBadge } from "../../../components/ui/AiBadge";
 import { MarkdownText } from "../../../components/ui/MarkdownText";
+import { Skeleton } from "../../../components/ui/Skeleton";
 import type { Destination, PlannerState } from "../../../domain/types";
 import { requestAiAlertMessage } from "../aiStargazingService";
 import {
@@ -72,12 +73,16 @@ export function AiAlertPreviewCard({
 
       <div className="mt-3">
         {isLoading ? (
-          <div className="space-y-1.5 animate-pulse py-1">
-            <div className="flex items-center gap-2 text-[11px] text-stone-600">
+          <div className="space-y-2.5 py-1">
+            <div className="flex items-center gap-2 text-[11px] text-teal font-medium">
               <Sparkle size={13} className="text-teal animate-spin" />
-              <span>실시간 천문 골든타임 기반 맞춤 알림 메시지를 작성 중입니다...</span>
+              <span>실시간 천문 골든타임 기반 맞춤 알림 메시지를 작성 중입니다…</span>
             </div>
-            <div className="h-3 w-4/5 rounded bg-line/60" />
+            <div className="rounded border border-teal/20 bg-white/70 p-3 shadow-xs space-y-2">
+              <Skeleton className="h-3 w-40 rounded" />
+              <Skeleton className="h-3.5 w-full rounded" />
+              <Skeleton className="h-3.5 w-3/4 rounded" />
+            </div>
           </div>
         ) : alertText ? (
           <div className="rounded border border-teal/25 bg-white/80 p-3 shadow-xs">

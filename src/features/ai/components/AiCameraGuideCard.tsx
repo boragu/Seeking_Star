@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowClockwise, Camera, DeviceMobile, Sparkle, WarningCircle } from "@phosphor-icons/react";
 import { AiBadge } from "../../../components/ui/AiBadge";
 import { MarkdownText } from "../../../components/ui/MarkdownText";
+import { Skeleton } from "../../../components/ui/Skeleton";
 import type { Destination, PlannerState } from "../../../domain/types";
 import { requestAiAstrophotographyGuide } from "../aiStargazingService";
 import {
@@ -130,14 +131,19 @@ export function AiCameraGuideCard({
       {/* 가이드 본문 */}
       <div className="mt-3 min-h-[50px]">
         {isLoading ? (
-          <div className="space-y-2 py-1 animate-pulse">
-            <div className="flex items-center gap-2 text-[11px] text-stone-600">
+          <div className="space-y-2.5 py-1">
+            <div className="flex items-center gap-2 text-[11px] text-teal font-medium">
               <Sparkle size={14} className="text-teal animate-spin" />
-              <span>월령 및 광공해 조건을 분석하여 {deviceType === "smartphone" ? "스마트폰" : "카메라"} 최적 촬영값을 계산 중입니다...</span>
+              <span>월령 및 광공해 조건을 분석하여 {deviceType === "smartphone" ? "스마트폰" : "카메라"} 최적 촬영값을 계산 중입니다…</span>
             </div>
-            <div className="space-y-1.5">
-              <div className="h-3 w-4/5 rounded bg-line/60" />
-              <div className="h-3 w-3/4 rounded bg-line/40" />
+            <div className="grid grid-cols-3 gap-2 max-sm:grid-cols-1">
+              <Skeleton className="h-14 w-full rounded" />
+              <Skeleton className="h-14 w-full rounded" />
+              <Skeleton className="h-14 w-full rounded" />
+            </div>
+            <div className="space-y-1.5 pt-1">
+              <Skeleton className="h-3.5 w-full rounded" />
+              <Skeleton className="h-3.5 w-4/5 rounded" />
             </div>
           </div>
         ) : hasError ? (

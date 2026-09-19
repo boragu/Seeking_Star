@@ -8,6 +8,8 @@ import { PageHeading } from "../components/ui/PageHeading";
 import { DestinationSpotlight } from "../features/planner/components/DestinationSpotlight";
 import { PlannerForm } from "../features/planner/components/PlannerForm";
 import { DestinationListView } from "../features/recommendations/components/DestinationListView";
+import { DestinationListViewSkeleton } from "../features/recommendations/components/DestinationListViewSkeleton";
+import { DestinationSpotlightSkeleton } from "../features/recommendations/components/DestinationSpotlightSkeleton";
 import { RecommendationState } from "../features/recommendations/components/RecommendationState";
 import { SourceNote } from "../features/recommendations/components/SourceNote";
 
@@ -44,7 +46,50 @@ export function PlannerPage({ navigate }: PlannerPageProps) {
       return <RecommendationState status="idle" onRetry={handleReload} />;
     }
     if (status === "loading") {
-      return <RecommendationState status="loading" onRetry={handleReload} />;
+      return (
+        <div className="space-y-3">
+          {/* 상단 뷰 모드 전환 탭 및 로딩 안내 */}
+          <div className="flex items-center justify-between gap-2 border-b border-line/60 pb-2">
+            <div className="flex items-center gap-1.5 bg-paper/90 p-1 rounded-lg border border-line opacity-75">
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-[12px] font-bold transition cursor-pointer ${
+                  viewMode === "list"
+                    ? "bg-teal text-white shadow-xs"
+                    : "text-stone-600 hover:text-ink hover:bg-white/60"
+                }`}
+              >
+                <ListBullets size={15} />
+                <span>추천 후보 목록</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("detail")}
+                className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-[12px] font-bold transition cursor-pointer ${
+                  viewMode === "detail"
+                    ? "bg-teal text-white shadow-xs"
+                    : "text-stone-600 hover:text-ink hover:bg-white/60"
+                }`}
+              >
+                <Eye size={15} />
+                <span>상세 분석</span>
+              </button>
+            </div>
+
+            <span className="flex items-center gap-1.5 text-[11px] text-teal font-medium">
+              <Sparkle size={13} className="animate-spin" />
+              <span>TourAPI 및 혼잡도 종합 분석 중…</span>
+            </span>
+          </div>
+
+          {viewMode === "list" ? (
+            <DestinationListViewSkeleton />
+          ) : (
+            <DestinationSpotlightSkeleton />
+          )}
+        </div>
+      );
     }
     if (status === "error") {
       return (
