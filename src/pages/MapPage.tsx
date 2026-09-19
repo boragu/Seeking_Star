@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { Drawer } from "vaul";
 import { ArrowRight } from "@phosphor-icons/react";
 import type { Navigate } from "../app/navigation";
 import { useApp } from "../app/AppContext";
 import { AppPage } from "../components/layout/AppPage";
 import { JourneyStepper } from "../components/layout/JourneyStepper";
+import { BottomSheet } from "../components/ui/BottomSheet";
 import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
 import { MapCanvas } from "../features/map/components/MapCanvas";
@@ -13,7 +12,6 @@ import { createMapEmbedUrl } from "../features/map/createMapEmbedUrl";
 
 export function MapPage({ navigate }: { navigate: Navigate }) {
   const { planner, destination, route, location } = useApp();
-  const [snap, setSnap] = useState<string | number | null>("210px");
   
   if (!destination) {
     return (
@@ -56,40 +54,23 @@ export function MapPage({ navigate }: { navigate: Navigate }) {
         <MapCanvas destination={destination} embedUrl={embedUrl} />
       </main>
 
-      {/* 모바일 화면 (전체 화면 지도 + Vaul 제스처 바텀시트) */}
+      {/* 모바일 화면 (전체 화면 지도 + 제스처 바텀시트) */}
       <div className="md:hidden relative h-[calc(100dvh-66px)] w-full overflow-hidden">
         <div className="absolute inset-0 z-0">
           <MapCanvas destination={destination} embedUrl={embedUrl} />
         </div>
 
-        <Drawer.Root
-          open={true}
-          dismissible={false}
-          modal={false}
-          snapPoints={["210px", "470px", 1]}
-          activeSnapPoint={snap}
-          setActiveSnapPoint={setSnap}
-        >
-          <Drawer.Portal>
-            <Drawer.Content
-              className="fixed inset-x-0 bottom-[66px] z-50 flex flex-col rounded-t-[22px] border-t border-cream/20 bg-[#091927] text-cream shadow-[0_-15px_45px_rgba(0,0,0,0.65)] outline-none"
-              style={{ maxHeight: "calc(100dvh - 120px)" }}
-            >
-              <div className="mx-auto my-2.5 h-1.5 w-12 shrink-0 rounded-full bg-cream/30 cursor-grab active:cursor-grabbing hover:bg-cream/50" />
-              <div className="overflow-y-auto px-5 pb-6">
-                <RoutePanel
-                  isMobileSheet
-                  navigate={navigate}
-                  planner={planner}
-                  destination={destination}
-                  route={route}
-                  requestCurrentLocation={location.request}
-                  locationFeedback={location.feedback}
-                />
-              </div>
-            </Drawer.Content>
-          </Drawer.Portal>
-        </Drawer.Root>
+        <BottomSheet snapPoints={[0.26, 0.62, 0.9]}>
+          <RoutePanel
+            isMobileSheet
+            navigate={navigate}
+            planner={planner}
+            destination={destination}
+            route={route}
+            requestCurrentLocation={location.request}
+            locationFeedback={location.feedback}
+          />
+        </BottomSheet>
       </div>
     </AppPage>
   );
