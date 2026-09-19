@@ -17,11 +17,11 @@ export function ObservationGuide({
   return (
     <section className="mt-6 border border-line bg-white/45 p-6 shadow-[0_16px_45px_rgba(68,49,29,.05)] max-sm:p-5">
       <div className="flex items-center justify-between border-b border-line pb-3 max-sm:flex-wrap max-sm:gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <h2 className="font-display text-[20px] font-bold">현장 관측 및 촬영 가이드</h2>
           <AiBadge label="AI 가이드" variant="teal" />
         </div>
-        <span className="text-[11px] text-stone-500">천문력·위치 좌표 기반 생성</span>
+        <span className="shrink-0 text-[11px] text-stone-500">천문력·위치 좌표 기반 생성</span>
       </div>
 
       <p className="mt-3 text-[12px] leading-relaxed text-stone-600">
@@ -48,9 +48,10 @@ export function ObservationGuide({
 
       <div className="mt-4 grid grid-cols-[1.2fr_1fr] gap-4 max-md:grid-cols-1">
         <div className="rounded bg-paper/70 p-3 text-[11px]">
-          <div className="flex items-center justify-between font-bold text-stone-700">
-            <div className="flex items-center gap-1.5">
-              <Camera size={16} /> 권장 사진·스마트폰 촬영 설정
+          <div className="flex items-center justify-between gap-2 font-bold text-stone-700">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Camera size={16} className="shrink-0" />
+              <span className="truncate">권장 사진·스마트폰 촬영 설정</span>
             </div>
             <AiBadge label="AI 추천" variant="subtle" size="sm" />
           </div>

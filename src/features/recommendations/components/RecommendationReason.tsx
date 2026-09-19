@@ -18,14 +18,16 @@ export function RecommendationReason({
   return (
     <div className="mt-4 border border-line bg-paper/60 p-4">
       <div className="flex items-center justify-between border-b border-line/60 pb-2.5 max-sm:flex-wrap max-sm:gap-2">
-        <div className="flex items-center gap-2">
-          <ShieldCheck size={18} className="text-teal" />
-          <h3 className="font-display text-[14px] font-bold text-ink">
-            {analysis.headline}
-          </h3>
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <ShieldCheck size={18} className="shrink-0 text-teal" />
+            <h3 className="font-display text-[14px] font-bold text-ink">
+              {analysis.headline}
+            </h3>
+          </div>
           <AiBadge label="AI 분석" variant="teal" />
         </div>
-        <span className="text-[11px] text-stone-500">과밀 분산 & 안심 여정</span>
+        <span className="shrink-0 text-[11px] text-stone-500">과밀 분산 & 안심 여정</span>
       </div>
 
       <p className="mt-2.5 text-[11px] leading-relaxed text-stone-600">

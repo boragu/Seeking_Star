@@ -3,6 +3,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef } from "react";
 import type { Destination, PlannerState, RouteEstimate } from "../../../domain/types";
+import { resolveDestinationCoordinates } from "../../../lib/geoFallback";
 
 export function MapCanvas({
   destination,
@@ -16,8 +17,14 @@ export function MapCanvas({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
-  const hasOrigin = planner.latitude !== null && planner.longitude !== null;
-  const hasDest = destination.latitude !== null && destination.longitude !== null;
+  const destCoords = resolveDestinationCoordinates(destination);
+  const originLat = planner.latitude;
+  const originLng = planner.longitude;
+  const destLat = destCoords.latitude;
+  const destLng = destCoords.longitude;
+
+  const hasOrigin = originLat !== null && originLng !== null && Number.isFinite(originLat) && Number.isFinite(originLng);
+  const hasDest = destLat !== null && destLng !== null && Number.isFinite(destLat) && Number.isFinite(destLng);
 
   useEffect(() => {
     const container = mapContainerRef.current;
@@ -30,8 +37,8 @@ export function MapCanvas({
       mapInstanceRef.current = null;
     }
 
-    const defaultLat = destination.latitude ?? planner.latitude ?? 37.5559;
-    const defaultLng = destination.longitude ?? planner.longitude ?? 126.9723;
+    const defaultLat = destLat ?? originLat ?? 37.5559;
+    const defaultLng = destLng ?? originLng ?? 126.9723;
 
     // 지도 생성
     const map = L.map(container, {
@@ -52,9 +59,7 @@ export function MapCanvas({
 
     // 1. 내 위치 (출발지) 마커
     if (hasOrigin) {
-      const originLat = planner.latitude!;
-      const originLng = planner.longitude!;
-      boundsPoints.push([originLat, originLng]);
+      boundsPoints.push([originLat!, originLng!]);
 
       const originIcon = L.divIcon({
         className: "custom-origin-pin",
@@ -70,16 +75,14 @@ export function MapCanvas({
         iconAnchor: [60, 42],
       });
 
-      L.marker([originLat, originLng], { icon: originIcon })
+      L.marker([originLat!, originLng!], { icon: originIcon })
         .addTo(map)
         .bindPopup(`<b>출발지: ${planner.departure}</b><br>현재 설정된 출발 위치입니다.`);
     }
 
     // 2. 관측지 (목적지) 마커
     if (hasDest) {
-      const destLat = destination.latitude!;
-      const destLng = destination.longitude!;
-      boundsPoints.push([destLat, destLng]);
+      boundsPoints.push([destLat!, destLng!]);
 
       const destIcon = L.divIcon({
         className: "custom-dest-pin",
@@ -95,7 +98,7 @@ export function MapCanvas({
         iconAnchor: [70, 46],
       });
 
-      const destMarker = L.marker([destLat, destLng], { icon: destIcon })
+      const destMarker = L.marker([destLat!, destLng!], { icon: destIcon })
         .addTo(map)
         .bindPopup(`<b>⭐ ${destination.name}</b><br>${destination.address || destination.region || "위치 정보"}`);
 
@@ -110,8 +113,8 @@ export function MapCanvas({
     if (hasOrigin && hasDest) {
       const polyline = L.polyline(
         [
-          [planner.latitude!, planner.longitude!],
-          [destination.latitude!, destination.longitude!],
+          [originLat!, originLng!],
+          [destLat!, destLng!],
         ],
         {
           color: "#2f6b64",
@@ -179,7 +182,7 @@ export function MapCanvas({
       map.remove();
       mapInstanceRef.current = null;
     };
-  }, [destination, planner, hasOrigin, hasDest, route]);
+  }, [destination, planner, hasOrigin, hasDest, originLat, originLng, destLat, destLng, route]);
 
   const fitAll = () => {
     if (!mapInstanceRef.current || !hasOrigin || !hasDest) return;
@@ -188,8 +191,8 @@ export function MapCanvas({
 
     mapInstanceRef.current.fitBounds(
       L.latLngBounds([
-        [planner.latitude!, planner.longitude!],
-        [destination.latitude!, destination.longitude!],
+        [originLat!, originLng!],
+        [destLat!, destLng!],
       ]),
       isMobile
         ? {
@@ -212,12 +215,12 @@ export function MapCanvas({
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
     if (isMobile) {
       const bottomOffset = Math.round(window.innerHeight * 0.36 + 66);
-      const point = map.project([planner.latitude!, planner.longitude!], 14);
+      const point = map.project([originLat!, originLng!], 14);
       const adjustedPoint = L.point(point.x, point.y + bottomOffset / 2);
       const adjustedLatLng = map.unproject(adjustedPoint, 14);
       map.flyTo([adjustedLatLng.lat, adjustedLatLng.lng], 14, { duration: 0.8 });
     } else {
-      map.flyTo([planner.latitude!, planner.longitude!], 14, { duration: 0.8 });
+      map.flyTo([originLat!, originLng!], 14, { duration: 0.8 });
     }
   };
 
@@ -227,12 +230,12 @@ export function MapCanvas({
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
     if (isMobile) {
       const bottomOffset = Math.round(window.innerHeight * 0.36 + 66);
-      const point = map.project([destination.latitude!, destination.longitude!], 14);
+      const point = map.project([destLat!, destLng!], 14);
       const adjustedPoint = L.point(point.x, point.y + bottomOffset / 2);
       const adjustedLatLng = map.unproject(adjustedPoint, 14);
       map.flyTo([adjustedLatLng.lat, adjustedLatLng.lng], 14, { duration: 0.8 });
     } else {
-      map.flyTo([destination.latitude!, destination.longitude!], 14, { duration: 0.8 });
+      map.flyTo([destLat!, destLng!], 14, { duration: 0.8 });
     }
   };
 

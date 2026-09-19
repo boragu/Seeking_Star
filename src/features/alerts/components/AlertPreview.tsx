@@ -35,7 +35,7 @@ export function AlertPreview({
   return (
     <aside className="alert-preview relative overflow-hidden p-7 text-cream shadow-[0_24px_70px_rgba(6,18,30,.22)] max-md:p-5">
       <div className="absolute -right-12 -top-12 size-40 rounded-full border border-gold/12" />
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h2 className="font-display text-xl font-bold">알림 수신 미리보기</h2>
         <AiBadge label="AI 알림" variant="dark" />
       </div>

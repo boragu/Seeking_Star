@@ -17,7 +17,13 @@ function loadSavedJourneys(): SavedJourneyItem[] {
 }
 
 export function useJourneySelection() {
-  const [selectedId, setSelectedIdState] = useState<string | null>(null);
+  const [selectedId, setSelectedIdState] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(SELECTED_KEY);
+    } catch {
+      return null;
+    }
+  });
   const [savedJourneys, setSavedJourneysState] = useState<SavedJourneyItem[]>(loadSavedJourneys);
 
   const setSelectedId = useCallback((id: string | null) => {
@@ -47,6 +53,8 @@ export function useJourneySelection() {
       destinationName: destination.name,
       destinationAddress: destination.address || destination.region,
       destinationRegion: destination.region,
+      latitude: destination.latitude,
+      longitude: destination.longitude,
       imageUrl: destination.imageUrl || destination.thumbnailUrl,
       calm: destination.calm,
       distanceKm: destination.distanceKm,

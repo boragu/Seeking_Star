@@ -34,14 +34,14 @@ export function AiBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded border font-sans font-bold leading-none tracking-tight",
+        "inline-flex shrink-0 items-center whitespace-nowrap select-none rounded border font-sans font-bold leading-none tracking-tight",
         variantStyles[variant],
         sizeStyles[size],
         className
       )}
     >
       <Sparkle size={iconSizes[size]} weight="fill" className="shrink-0" />
-      <span>{label}</span>
+      <span className="shrink-0 whitespace-nowrap">{label}</span>
     </span>
   );
 }

@@ -9,14 +9,15 @@ export function useRecommendations(planner: PlannerState, autoFetch: boolean = f
   const [data, setData] = useState<RecommendationResponse | null>(null);
   const [status, setStatus] = useState<RecommendationStatus>("idle");
   const [error, setError] = useState<ApiRequestError | null>(null);
-  const requested = useRef(false);
+  const lastQueryRef = useRef<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (customPlanner?: PlannerState) => {
+    const targetPlanner = customPlanner ?? planner;
     setStatus("loading");
     setError(null);
     const controller = new AbortController();
     try {
-      const next = await fetchRecommendations(planner, controller.signal);
+      const next = await fetchRecommendations(targetPlanner, controller.signal);
       setData(next);
       setStatus("success");
       return next;
@@ -32,10 +33,12 @@ export function useRecommendations(planner: PlannerState, autoFetch: boolean = f
   }, [planner]);
 
   useEffect(() => {
-    if (!autoFetch || requested.current) return;
-    requested.current = true;
+    if (!autoFetch) return;
+    const currentQueryKey = `${planner.date}_${planner.time}_${planner.latitude}_${planner.longitude}`;
+    if (lastQueryRef.current === currentQueryKey) return;
+    lastQueryRef.current = currentQueryKey;
     void load();
-  }, [autoFetch, load]);
+  }, [autoFetch, planner.date, planner.time, planner.latitude, planner.longitude, load]);
 
-  return { data, status, error, reload: load };
+  return { data, status, error, reload: () => load() };
 }

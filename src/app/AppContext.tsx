@@ -5,6 +5,7 @@ import type { Destination, PlannerState, SavedJourneyItem } from "../domain/type
 import { useJourneySelection } from "../features/journey/useJourneySelection";
 import { useDeviceLocation } from "../features/location/useDeviceLocation";
 import { useRecommendations } from "../features/recommendations/useRecommendations";
+import { calculateDistanceKm, estimateTravelMinutes, resolveDestinationCoordinates } from "../lib/geoFallback";
 import { rankDestinations, scoreDestination, type RankedDestination } from "../lib/recommendationEngine";
 import { useRoute } from "./navigation";
 
@@ -13,13 +14,36 @@ export type AppContextType = ReturnType<typeof useAppModel>;
 const AppContext = createContext<AppContextType | null>(null);
 
 function savedItemToDestination(item: SavedJourneyItem, planner: PlannerState): RankedDestination {
-  const dest: Destination = item.destination ?? {
+  const coords = resolveDestinationCoordinates(
+    item.destination ?? {
+      name: item.destinationName,
+      address: item.destinationAddress,
+      region: item.destinationRegion,
+      latitude: item.latitude ?? null,
+      longitude: item.longitude ?? null,
+    }
+  );
+
+  const distKm =
+    item.destination?.distanceKm ??
+    item.distanceKm ??
+    calculateDistanceKm(
+      { latitude: planner.latitude, longitude: planner.longitude },
+      coords
+    );
+
+  const travelMins =
+    item.destination?.travelMinutesEstimate ??
+    item.travelMinutesEstimate ??
+    estimateTravelMinutes(distKm);
+
+  const rawDest: Destination = item.destination ?? {
     id: item.destinationId,
     name: item.destinationName,
     address: item.destinationAddress,
     region: item.destinationRegion,
-    latitude: null,
-    longitude: null,
+    latitude: coords.latitude,
+    longitude: coords.longitude,
     imageUrl: item.imageUrl ?? null,
     thumbnailUrl: item.imageUrl ?? null,
     contentTypeId: null,
@@ -29,15 +53,23 @@ function savedItemToDestination(item: SavedJourneyItem, planner: PlannerState): 
     concentrationRate: null,
     concentrationDate: null,
     calm: item.calm ?? null,
-    distanceKm: item.distanceKm ?? null,
-    travelMinutesEstimate: item.travelMinutesEstimate ?? null,
-    travelEstimateMethod: null,
+    distanceKm: distKm,
+    travelMinutesEstimate: travelMins,
+    travelEstimateMethod: "공공데이터 좌표 기반 계산",
     nearbyCampgrounds: [],
     relatedPlaces: [],
     accessible: null,
     cloud: null,
     parkingMinutes: null,
     observingWindow: null,
+  };
+
+  const dest: Destination = {
+    ...rawDest,
+    latitude: coords.latitude ?? rawDest.latitude,
+    longitude: coords.longitude ?? rawDest.longitude,
+    distanceKm: distKm ?? rawDest.distanceKm,
+    travelMinutesEstimate: travelMins ?? rawDest.travelMinutesEstimate,
   };
 
   return {
@@ -51,21 +83,51 @@ function useAppModel(path: string) {
   const journey = useJourneySelection();
   const { selectedId, setSelectedId } = journey;
   const location = useDeviceLocation(setPlanner);
-  const recommendations = useRecommendations(planner, false);
+  const recommendations = useRecommendations(planner, true);
   const ranked = useMemo(() => rankDestinations(recommendations.data?.destinations ?? [], planner), [recommendations.data, planner]);
   
   const destination = useMemo(() => {
+    let target: Destination | null = null;
     if (selectedId) {
       const fromRanked = ranked.find((item) => item.id === selectedId);
-      if (fromRanked) return fromRanked;
-      const fromSaved = journey.savedJourneys.find((item) => item.destinationId === selectedId);
-      if (fromSaved) return savedItemToDestination(fromSaved, planner);
+      if (fromRanked) {
+        target = fromRanked;
+      } else {
+        const fromSaved = journey.savedJourneys.find((item) => item.destinationId === selectedId);
+        if (fromSaved) target = savedItemToDestination(fromSaved, planner);
+      }
     }
-    if (ranked.length > 0) return ranked[0];
-    if (journey.savedJourneys.length > 0) {
-      return savedItemToDestination(journey.savedJourneys[0], planner);
+    if (!target && ranked.length > 0) target = ranked[0];
+    if (!target && journey.savedJourneys.length > 0) {
+      target = savedItemToDestination(journey.savedJourneys[0], planner);
     }
-    return null;
+    if (!target) return null;
+
+    // 좌표가 누락된 경우 안전하게 폴백 좌표 매핑
+    const coords = resolveDestinationCoordinates(target);
+    const distKm =
+      target.distanceKm ??
+      calculateDistanceKm(
+        { latitude: planner.latitude, longitude: planner.longitude },
+        coords
+      );
+    const travelMins =
+      target.travelMinutesEstimate ?? estimateTravelMinutes(distKm);
+
+    const updatedDest: Destination = {
+      ...target,
+      latitude: coords.latitude ?? target.latitude,
+      longitude: coords.longitude ?? target.longitude,
+      distanceKm: distKm,
+      travelMinutesEstimate: travelMins,
+    };
+
+    const analysis = "analysis" in target && target.analysis ? target.analysis : scoreDestination(updatedDest, planner);
+
+    return {
+      ...updatedDest,
+      analysis,
+    } as RankedDestination;
   }, [ranked, selectedId, journey.savedJourneys, planner]);
 
   const route = useMemo(() => createRouteEstimate(destination), [destination]);

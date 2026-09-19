@@ -68,6 +68,8 @@ export interface SavedJourneyItem {
   destinationName: string;
   destinationAddress: string;
   destinationRegion: string;
+  latitude?: number | null;
+  longitude?: number | null;
   imageUrl: string | null;
   calm: number | null;
   distanceKm: number | null;
