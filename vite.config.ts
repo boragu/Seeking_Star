@@ -16,9 +16,23 @@ function localApiPlugin(bindings: Record<string, string>): Plugin {
         try {
           const host = Array.isArray(incoming.headers.host) ? incoming.headers.host[0] : incoming.headers.host;
           const origin = `http://${host ?? "localhost"}`;
+
+          // Read body for POST / PUT / PATCH requests
+          let bodyPayload: string | undefined;
+          if (incoming.method !== "GET" && incoming.method !== "HEAD") {
+            const chunks: string[] = [];
+            for await (const chunk of request as unknown as AsyncIterable<Uint8Array | string>) {
+              chunks.push(typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk));
+            }
+            if (chunks.length > 0) {
+              bodyPayload = chunks.join("");
+            }
+          }
+
           const workerResponse = await worker.fetch(new Request(new URL(incoming.url, origin), {
             method: incoming.method,
             headers: incoming.headers as HeadersInit,
+            body: bodyPayload,
           }), {
             ...bindings,
             ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) },
