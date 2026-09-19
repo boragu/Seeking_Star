@@ -87,7 +87,7 @@ export function BottomSheet({
   return (
     <div
       ref={sheetRef}
-      className="fixed inset-x-0 bottom-[66px] z-50 flex flex-col rounded-t-[22px] border-t border-cream/20 bg-[#091927] text-cream shadow-[0_-15px_45px_rgba(0,0,0,0.65)]"
+      className="fixed inset-x-0 bottom-[calc(66px+env(safe-area-inset-bottom,0px))] z-50 flex flex-col rounded-t-[22px] border-t border-cream/20 bg-[#091927] text-cream shadow-[0_-15px_45px_rgba(0,0,0,0.65)]"
       style={{
         height: `${calculatedHeight}px`,
         transition: isDragging ? "none" : "height 0.28s cubic-bezier(0.32, 0.72, 0, 1)",
@@ -115,7 +115,7 @@ export function BottomSheet({
       </div>
 
       {/* 내부 콘텐츠 스크롤 영역 */}
-      <div className="flex-1 overflow-y-auto px-5 pb-6">
+      <div className="flex-1 overflow-y-auto px-5 pb-16">
         {children}
       </div>
     </div>

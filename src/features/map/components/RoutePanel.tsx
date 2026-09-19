@@ -126,9 +126,11 @@ export function RoutePanel({
         {destination.address || `${destination.latitude ?? "—"}, ${destination.longitude ?? "—"}`}
       </p>
 
-      <Button className="mt-5 w-full" variant="night" onClick={() => navigate("/trips")}>
-        여정 확인 및 저장 <ArrowRight />
-      </Button>
+      <div className="mt-5 pb-6">
+        <Button className="w-full h-11" variant="night" onClick={() => navigate("/trips")}>
+          여정 확인 및 저장 <ArrowRight />
+        </Button>
+      </div>
     </aside>
   );
 }
