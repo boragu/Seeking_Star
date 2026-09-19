@@ -24,15 +24,19 @@ export function DestinationSpotlight({
 }) {
   const { planner } = useApp();
   const rankIndex = items.findIndex((item) => item.id === destination.id);
-  const rankLabel = rankIndex >= 0 ? `AI ${rankIndex + 1}순위 추천` : "AI 추천 관측지";
+  
+  const isRecommended = rankIndex >= 0 && rankIndex < 5 && (destination.analysis.total ?? 0) >= 60;
+  const rankLabel = isRecommended 
+    ? `AI ${rankIndex + 1}순위 추천` 
+    : `AI ${rankIndex + 1}순위 (추천 보류)`;
 
   return (
     <section className="border border-line bg-white/52 p-6 shadow-[0_20px_60px_rgba(68,49,29,.07)] max-md:p-4">
       <SectionHeading
-        number="02"
+        number={String(rankIndex + 1).padStart(2, "0")}
         title={rankLabel}
         description={`${destination.name}의 혼잡 분산도, 이동 거리, 인근 체류 인프라 종합 분석 결과`}
-        tone="rust"
+        tone={isRecommended ? "rust" : "teal"}
       />
       <div className="relative h-[290px] overflow-hidden bg-ink max-lg:h-[250px] max-sm:h-[210px]">
         <DestinationMedia destination={destination} />
@@ -40,7 +44,7 @@ export function DestinationSpotlight({
         <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-5 text-cream">
           <div className="min-w-0">
             <div className="mb-1 flex items-center gap-2">
-              <AiBadge label="AI 추천" variant="dark" />
+              <AiBadge label={isRecommended ? "AI 추천" : "AI 분석"} variant="dark" />
             </div>
             <h2 className="truncate font-display text-[clamp(26px,3vw,38px)] font-bold">{destination.name}</h2>
             <p className="mt-1 flex items-center gap-1 truncate text-[11px] text-cream/70">
@@ -59,7 +63,7 @@ export function DestinationSpotlight({
       </div>
       
       {/* 분산 및 추천 사유 분석 */}
-      <RecommendationReason destination={destination} planner={planner} />
+      <RecommendationReason destination={destination} planner={planner} rankIndex={rankIndex} />
 
       <div className="mt-4">
         <ScoreBreakdown destination={destination} />

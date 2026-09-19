@@ -27,7 +27,8 @@ export interface StargazingObservationGuide {
  */
 export function analyzeRecommendationReason(
   destination: RankedDestination,
-  planner: PlannerState
+  planner: PlannerState,
+  rankIndex: number = 0
 ): RecommendationAnalysis {
   const calmScore = destination.calm ?? (destination.concentrationRate !== null ? Math.round(100 - destination.concentrationRate) : 75);
   const campgroundsCount = destination.nearbyCampgrounds?.length ?? 0;
@@ -35,11 +36,16 @@ export function analyzeRecommendationReason(
   const travelMins = destination.travelMinutesEstimate ?? (destination.distanceKm ? Math.round((destination.distanceKm / 70) * 60) : 60);
   const distance = destination.distanceKm ? `${destination.distanceKm}km` : `약 ${travelMins}분`;
   const isHighDensity = calmScore < 50;
+  
+  const isRecommended = rankIndex < 5 && (destination.analysis.total ?? 0) >= 60;
 
   let headline = `${destination.name} 추천 이유`;
   let summary = "";
 
-  if (isHighDensity) {
+  if (!isRecommended) {
+    headline = `${destination.name} 관측 보류/주의 안내`;
+    summary = `데이터 종합 분석 결과 추천 순위가 다소 낮게 산출되었습니다. 혼잡도나 이동 거리, 야영 인프라 등의 측면에서 다음 요소들을 고려하여 방문을 신중히 결정해 주세요.`;
+  } else if (isHighDensity) {
     headline = `${destination.name} 관측 및 방문 유의 안내`;
     summary = `전국적 인지도로 야간 방문객 집중률이 높은 명소입니다. 산간 진입로 정체와 주차 대기 시간을 고려하여 심야 시간대 분산 방문을 권장합니다.`;
   } else if (calmScore >= 80) {
@@ -52,8 +58,13 @@ export function analyzeRecommendationReason(
 
   const reasons: RecommendationReasonItem[] = [];
 
-  // 1. 혼잡 분산 & 진입 여유
-  if (isHighDensity) {
+  // 1. 혼잡 분산 & 진입 여유 (비추천/추천 분기)
+  if (!isRecommended && isHighDensity) {
+    reasons.push({
+      title: "혼잡도 초과 우려",
+      description: `현재 한적도 ${calmScore}점으로 야간 방문객 집중률이 매우 높게 예측됩니다. 좁은 산간 도로 진입 시 장시간 정체가 발생할 수 있습니다.`,
+    });
+  } else if (isHighDensity) {
     reasons.push({
       title: "혼잡 분산 권장",
       description: `현재 한적도 ${calmScore}점으로 야간 방문객이 많습니다. 진입로 정체를 피해 밤 22시 이후 또는 평일 방문을 권장합니다.`,
@@ -66,8 +77,13 @@ export function analyzeRecommendationReason(
     });
   }
 
-  // 2. 이동 효율 & 안전 주행
-  if (travelMins <= 90) {
+  // 2. 이동 효율 & 안전 주행 (비추천/추천 분기)
+  if (!isRecommended && travelMins > 150) {
+    reasons.push({
+      title: "장거리 심야 운전 주의",
+      description: `${planner.departure}에서 편도 ${distance}(약 ${travelMins}분)가 소요되어, 야간/새벽 시간대 왕복 운전 시 피로도 누적이 우려됩니다.`,
+    });
+  } else if (travelMins <= 90) {
     reasons.push({
       title: "적정 주행 & 심야 운전 안전",
       description: `${planner.departure}에서 편도 ${distance}(약 ${travelMins}분) 소요로 심야 왕복 운전 피로를 크게 줄일 수 있습니다.`,
@@ -79,8 +95,13 @@ export function analyzeRecommendationReason(
     });
   }
 
-  // 3. 합법 체류 & 야영 인프라
-  if (campgroundsCount > 0) {
+  // 3. 합법 체류 & 야영 인프라 (비추천/추천 분기)
+  if (!isRecommended && campgroundsCount === 0) {
+    reasons.push({
+      title: "정식 체류 인프라 부족",
+      description: `반경 20km 내에 공공데이터에 등록된 정식 캠핑장이 부족합니다. 무단 차박이나 불법 야영을 피하기 위한 숙박 대안 확인이 필요합니다.`,
+    });
+  } else if (campgroundsCount > 0) {
     reasons.push({
       title: "합법 체류 & 안전 야영 인프라",
       description: `반경 20km 내에 공공데이터 등록 정식 캠핑장 ${campgroundsCount}곳이 있어, 노상 불법 차박 없이 안전하게 머무를 수 있습니다.`,

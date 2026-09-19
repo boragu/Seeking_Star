@@ -7,11 +7,13 @@ import { analyzeRecommendationReason } from "../../ai/aiStargazingService";
 export function RecommendationReason({
   destination,
   planner,
+  rankIndex = 0,
 }: {
   destination: RankedDestination;
   planner: PlannerState;
+  rankIndex?: number;
 }) {
-  const analysis = analyzeRecommendationReason(destination, planner);
+  const analysis = analyzeRecommendationReason(destination, planner, rankIndex);
 
   return (
     <div className="mt-4 border border-line bg-paper/60 p-4">

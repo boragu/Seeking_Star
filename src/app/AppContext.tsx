@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { createDefaultPlanner } from "../domain/planner";
 import { createRouteEstimate } from "../domain/routeEstimate";
 import type { PlannerState } from "../domain/types";
@@ -22,11 +22,25 @@ function useAppModel(path: string) {
   const destination = ranked.find((item) => item.id === selectedId) ?? ranked[0] ?? null;
   const route = useMemo(() => createRouteEstimate(destination), [destination]);
 
+  const reloadRecommendations = useCallback(async () => {
+    setSelectedId(null);
+    return recommendations.reload();
+  }, [setSelectedId, recommendations]);
+
   useEffect(() => {
     if (ranked.length && (!selectedId || !ranked.some((item) => item.id === selectedId))) setSelectedId(ranked[0].id);
   }, [ranked, selectedId, setSelectedId]);
 
-  return { planner, setPlanner, ranked, destination, route, recommendations, location, journey };
+  return { 
+    planner, 
+    setPlanner, 
+    ranked, 
+    destination, 
+    route, 
+    recommendations: { ...recommendations, reload: reloadRecommendations }, 
+    location, 
+    journey 
+  };
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {

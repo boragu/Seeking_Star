@@ -17,12 +17,16 @@ function loadSavedJourneys(): SavedJourneyItem[] {
 }
 
 export function useJourneySelection() {
-  const [selectedId, setSelectedIdState] = useState<string | null>(() => localStorage.getItem(SELECTED_KEY));
+  const [selectedId, setSelectedIdState] = useState<string | null>(null);
   const [savedJourneys, setSavedJourneysState] = useState<SavedJourneyItem[]>(loadSavedJourneys);
 
-  const setSelectedId = useCallback((id: string) => {
+  const setSelectedId = useCallback((id: string | null) => {
     setSelectedIdState(id);
-    localStorage.setItem(SELECTED_KEY, id);
+    if (id) {
+      localStorage.setItem(SELECTED_KEY, id);
+    } else {
+      localStorage.removeItem(SELECTED_KEY);
+    }
   }, []);
 
   const persistJourneys = useCallback((items: SavedJourneyItem[]) => {

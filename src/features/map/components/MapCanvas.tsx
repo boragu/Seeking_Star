@@ -20,10 +20,12 @@ export function MapCanvas({
   const hasDest = destination.latitude !== null && destination.longitude !== null;
 
   useEffect(() => {
-    if (!mapContainerRef.current) return;
+    const container = mapContainerRef.current;
+    if (!container) return;
 
     // 기존 지도 인스턴스가 있으면 제거
     if (mapInstanceRef.current) {
+      mapInstanceRef.current.stop();
       mapInstanceRef.current.remove();
       mapInstanceRef.current = null;
     }
@@ -32,7 +34,7 @@ export function MapCanvas({
     const defaultLng = destination.longitude ?? planner.longitude ?? 126.9723;
 
     // 지도 생성
-    const map = L.map(mapContainerRef.current, {
+    const map = L.map(container, {
       center: [defaultLat, defaultLng],
       zoom: 11,
       zoomControl: false,
@@ -93,10 +95,15 @@ export function MapCanvas({
         iconAnchor: [70, 46],
       });
 
-      L.marker([destLat, destLng], { icon: destIcon })
+      const destMarker = L.marker([destLat, destLng], { icon: destIcon })
         .addTo(map)
-        .bindPopup(`<b>⭐ ${destination.name}</b><br>${destination.address || destination.region || "위치 정보"}`)
-        .openPopup();
+        .bindPopup(`<b>⭐ ${destination.name}</b><br>${destination.address || destination.region || "위치 정보"}`);
+
+      try {
+        destMarker.openPopup();
+      } catch {
+        // Safe popup opening
+      }
     }
 
     // 3. 출발지 ~ 목적지 연결 점선 경로
@@ -122,17 +129,26 @@ export function MapCanvas({
       }
     }
 
-    // 4. 화면에 맞게 자동 줌/패닝 (Fit Bounds)
+    // 4. 화면에 맞게 자동 줌/패닝 (Fit Bounds) - 초기 로드는 비동기 애니메이션 없이 즉시 설정
     if (boundsPoints.length > 1) {
       map.fitBounds(L.latLngBounds(boundsPoints), {
         padding: [60, 60],
         maxZoom: 13,
+        animate: false,
       });
     } else if (boundsPoints.length === 1) {
-      map.setView(boundsPoints[0], 12);
+      map.setView(boundsPoints[0], 12, { animate: false });
     }
 
+    // ResizeObserver로 반응형 레이아웃 변경 시 지도 리사이즈 동기화
+    const resizeObserver = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    resizeObserver.observe(container);
+
     return () => {
+      resizeObserver.disconnect();
+      map.stop();
       map.remove();
       mapInstanceRef.current = null;
     };

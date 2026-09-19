@@ -35,31 +35,14 @@ export function MapPage({ navigate }: { navigate: Navigate }) {
         <JourneyStepper current={2} dark />
       </div>
 
-      {/* 데스크톱 화면 분할 뷰 */}
+      {/* 통합 지도 및 경로 뷰 (데스크톱 2컬럼 / 모바일 전체화면 지도 + 바텀시트) */}
       <main
         id="main-content"
-        className="hidden md:grid h-[calc(100vh-132px)] min-h-[610px] grid-cols-[410px_1fr] max-lg:grid-cols-[365px_1fr]"
+        className="relative h-[calc(100vh-132px)] min-h-[610px] w-full overflow-hidden max-md:h-[calc(100dvh-66px)] max-md:min-h-0 md:grid md:grid-cols-[410px_1fr] max-lg:md:grid-cols-[365px_1fr]"
       >
-        <RoutePanel
-          navigate={navigate}
-          planner={planner}
-          destination={destination}
-          route={route}
-          requestCurrentLocation={location.request}
-          locationFeedback={location.feedback}
-        />
-        <MapCanvas destination={destination} planner={planner} route={route} />
-      </main>
-
-      {/* 모바일 화면 (전체 화면 지도 + 제스처 바텀시트) */}
-      <div className="md:hidden relative h-[calc(100dvh-66px)] w-full overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <MapCanvas destination={destination} planner={planner} route={route} />
-        </div>
-
-        <BottomSheet snapPoints={[0.26, 0.62, 0.9]}>
+        {/* 데스크톱 사이드 패널 */}
+        <div className="hidden h-full overflow-hidden md:block">
           <RoutePanel
-            isMobileSheet
             navigate={navigate}
             planner={planner}
             destination={destination}
@@ -67,8 +50,28 @@ export function MapPage({ navigate }: { navigate: Navigate }) {
             requestCurrentLocation={location.request}
             locationFeedback={location.feedback}
           />
-        </BottomSheet>
-      </div>
+        </div>
+
+        {/* 단일 지도 캔버스 (데스크톱: 우측 컬럼 / 모바일: 전체 배경) */}
+        <div className="size-full max-md:absolute max-md:inset-0 max-md:z-0">
+          <MapCanvas destination={destination} planner={planner} route={route} />
+        </div>
+
+        {/* 모바일 하단 제스처 바텀시트 */}
+        <div className="md:hidden">
+          <BottomSheet snapPoints={[0.26, 0.62, 0.9]}>
+            <RoutePanel
+              isMobileSheet
+              navigate={navigate}
+              planner={planner}
+              destination={destination}
+              route={route}
+              requestCurrentLocation={location.request}
+              locationFeedback={location.feedback}
+            />
+          </BottomSheet>
+        </div>
+      </main>
     </AppPage>
   );
 }

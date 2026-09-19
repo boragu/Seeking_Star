@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ArrowRight, CalendarBlank, Car, CaretDown, Clock, Crosshair, Info, MapPin, SealCheck, UsersThree, Wheelchair } from "@phosphor-icons/react";
 import { Button } from "../../../components/ui/Button";
 import { Field, FieldFrame } from "../../../components/ui/Field";
@@ -22,6 +23,8 @@ export function PlannerForm({
   requestCurrentLocation: () => void;
   reload: () => void;
 }) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   const update = <K extends keyof PlannerState,>(key: K, value: PlannerState[K]) =>
     setPlanner((state) => ({ ...state, [key]: value }));
   const updateDeparture = (departure: string) => {
@@ -38,10 +41,37 @@ export function PlannerForm({
   const useCurrentTime = () => setPlanner((state) => ({ ...state, ...getCurrentDateTime() }));
   const locationProblem = ["denied", "error", "unsupported"].includes(locationFeedback.status);
 
+  const handleSubmit = () => {
+    reload();
+    setIsCollapsed(true);
+  };
+
   return (
     <section className="sticky top-[96px] self-start border border-line bg-[rgba(255,253,247,.72)] p-6 shadow-[0_20px_60px_rgba(68,49,29,.07)] backdrop-blur-md max-md:static max-md:p-5">
-      <SectionHeading number="01" title="조건 설정" description="출발지 및 일정 정보" />
-      <div className="space-y-4">
+      <div 
+        className="flex items-center justify-between cursor-pointer" 
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        title={isCollapsed ? "조건 설정 펼치기" : "조건 설정 접기"}
+      >
+        <SectionHeading number="01" title="조건 설정" description="출발지 및 일정 정보" />
+        <button 
+          className="text-stone-400 hover:text-stone-700 transition" 
+          aria-label={isCollapsed ? "조건 설정 펼치기" : "조건 설정 접기"}
+          type="button"
+        >
+          <CaretDown className={cn("transition-transform duration-300", isCollapsed ? "" : "rotate-180")} size={24} />
+        </button>
+      </div>
+
+      <div 
+        className="overflow-hidden transition-all duration-500 ease-in-out"
+        style={{ 
+          maxHeight: isCollapsed ? 0 : 800, 
+          opacity: isCollapsed ? 0 : 1,
+          marginTop: isCollapsed ? 0 : 16,
+        }}
+      >
+        <div className="space-y-4">
         <Field
           label="출발지"
           action={
@@ -154,9 +184,10 @@ export function PlannerForm({
           <Wheelchair size={18} className="text-teal" />
           <span>무장애 편의시설 보유 장소 우선 안내</span>
         </label>
-        <Button className="w-full" variant="primary" onClick={reload} disabled={status === "loading"}>
+        <Button className="w-full" variant="primary" onClick={handleSubmit} disabled={status === "loading"}>
           추천 장소 조회 <ArrowRight />
         </Button>
+      </div>
       </div>
     </section>
   );
